@@ -1,14 +1,15 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Nez.BitmapFonts;
-using Nez.Console;
-using Nez.Systems;
-using Nez.Textures;
-using Nez.Timers;
-using Nez.Tweens;
-using System;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections;
+using Nez.Systems;
+using Nez.Console;
+using Nez.Tweens;
+using Nez.Timers;
+using Nez.BitmapFonts;
+using Nez.Analysis;
+using Nez.Textures;
 using System.Diagnostics;
 
 
@@ -51,11 +52,6 @@ namespace Nez
 		public new static NezContentManager Content;
 
 		/// <summary>
-		/// Global access to graphicsdevicemanager
-		/// </summary>
-		public static GraphicsDeviceManager GraphicsManager;
-
-		/// <summary>
 		/// default SamplerState used by Materials. Note that this must be set at launch! Changing it after that time will result in only
 		/// Materials created after it was set having the new SamplerState
 		/// </summary>
@@ -77,7 +73,7 @@ namespace Nez
 		/// default GameServiceContainer access
 		/// </summary>
 		/// <value>The services.</value>
-		public new static GameServiceContainer Services => ((Game)_instance).Services;
+		public new static GameServiceContainer Services => ((Game) _instance).Services;
 
 		/// <summary>
 		/// provides access to the single Core/Game instance
@@ -88,11 +84,6 @@ namespace Nez
 		/// facilitates easy access to the global Content instance for internal classes
 		/// </summary>
 		internal static Core _instance;
-
-		/// <summary>
-		/// internal flag used to determine if EntitySystems should be used or not
-		/// </summary>
-		internal static bool entitySystemsEnabled;
 
 #if DEBUG
 		internal static long drawCalls;
@@ -130,8 +121,8 @@ namespace Nez
 				if (_instance._scene == null)
 				{
 					_instance._scene = value;
-					_instance.OnSceneChanged();
 					_instance._scene.Begin();
+					_instance.OnSceneChanged();
 				}
 				else
 				{
@@ -141,10 +132,7 @@ namespace Nez
 		}
 
 
-
-
-		public Core(int width = 1280, int height = 720, bool isFullScreen = false, bool enableEntitySystems = true,
-					string windowTitle = "Nez", string contentDirectory = "Content")
+		public Core(int width = 1280, int height = 720, bool isFullScreen = false, string windowTitle = "Nez", string contentDirectory = "Content")
 		{
 #if DEBUG
 			_windowTitle = windowTitle;
@@ -153,21 +141,17 @@ namespace Nez
 			_instance = this;
 			Emitter = new Emitter<CoreEvents>(new CoreEventsComparer());
 
-			GraphicsManager = new GraphicsDeviceManager(this)
+			var graphicsManager = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = width,
 				PreferredBackBufferHeight = height,
 				IsFullScreen = isFullScreen,
-				SynchronizeWithVerticalRetrace = true,
-#if MONOGAME_38
-				HardwareModeSwitch = true,
-				PreferHalfPixelOffset = true
-#endif
+				SynchronizeWithVerticalRetrace = true
 			};
-			GraphicsManager.DeviceReset += OnGraphicsDeviceReset;
-			GraphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+			graphicsManager.DeviceReset += OnGraphicsDeviceReset;
+			graphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 
-			Screen.Initialize(GraphicsManager);
+			Screen.Initialize(graphicsManager);
 			Window.ClientSizeChanged += OnGraphicsDeviceReset;
 			Window.OrientationChanged += OnOrientationChanged;
 
@@ -175,8 +159,6 @@ namespace Nez
 			Content = new NezGlobalContentManager(Services, base.Content.RootDirectory);
 			IsMouseVisible = true;
 			IsFixedTimeStep = false;
-
-			entitySystemsEnabled = enableEntitySystems;
 
 			// setup systems
 			RegisterGlobalManager(_coroutineManager);
@@ -217,7 +199,7 @@ namespace Nez
 
 		public new static void Exit()
 		{
-			((Game)_instance).Exit();
+			((Game) _instance).Exit();
 		}
 
 		#endregion
@@ -243,12 +225,14 @@ namespace Nez
 				return;
 			}
 
+			StartDebugUpdate();
+
 			// update all our systems and global managers
-			Time.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+			Time.Update((float) gameTime.ElapsedGameTime.TotalSeconds);
 			Input.Update();
 
 			if (ExitOnEscapeKeypress &&
-				(Input.IsKeyDown(Keys.Escape) || Input.GamePads[0].IsButtonReleased(Buttons.Back)))
+			    (Input.IsKeyDown(Keys.Escape) || Input.GamePads[0].IsButtonReleased(Buttons.Back)))
 			{
 				base.Exit();
 				return;
@@ -267,8 +251,8 @@ namespace Nez
 				// 		- unless it is SceneTransition that doesn't change Scenes (no reason not to update)
 				//		- or it is a SceneTransition that has already switched to the new Scene (the new Scene needs to do its thing)
 				if (_sceneTransition == null ||
-					(_sceneTransition != null &&
-					 (!_sceneTransition._loadsNewScene || _sceneTransition._isNewSceneLoaded)))
+				    (_sceneTransition != null &&
+				     (!_sceneTransition._loadsNewScene || _sceneTransition._isNewSceneLoaded)))
 				{
 					_scene.Update();
 				}
@@ -308,7 +292,7 @@ namespace Nez
 			if (_sceneTransition != null)
 			{
 				if (_scene != null && _sceneTransition.WantsPreviousSceneRender &&
-					!_sceneTransition.HasPreviousSceneRender)
+				    !_sceneTransition.HasPreviousSceneRender)
 				{
 					_scene.Render();
 					_scene.PostRender(_sceneTransition.PreviousSceneRender);
@@ -349,9 +333,19 @@ namespace Nez
 		#region Debug Injection
 
 		[Conditional("DEBUG")]
+		void StartDebugUpdate()
+		{
+#if DEBUG
+			TimeRuler.Instance.StartFrame();
+			TimeRuler.Instance.BeginMark("update", Color.Green);
+#endif
+		}
+
+		[Conditional("DEBUG")]
 		void EndDebugUpdate()
 		{
 #if DEBUG
+			TimeRuler.Instance.EndMark("update");
 			DebugConsole.Instance.Update();
 			drawCalls = 0;
 #endif
@@ -361,6 +355,8 @@ namespace Nez
 		void StartDebugDraw(TimeSpan elapsedGameTime)
 		{
 #if DEBUG
+			TimeRuler.Instance.BeginMark("draw", Color.Gold);
+
 			// fps counter
 			_frameCounter++;
 			_frameCounterElapsedTime += elapsedGameTime;
@@ -378,7 +374,13 @@ namespace Nez
 		void EndDebugDraw()
 		{
 #if DEBUG
+			TimeRuler.Instance.EndMark("draw");
 			DebugConsole.Instance.Render();
+
+			// the TimeRuler only needs to render when the DebugConsole is not open
+			if (!DebugConsole.Instance.IsOpen)
+				TimeRuler.Instance.Render();
+
 #if !FNA
 			drawCalls = GraphicsDevice.Metrics.DrawCount;
 #endif
