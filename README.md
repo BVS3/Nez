@@ -1,14 +1,16 @@
-![Nez](FAQs/images/nez-logo-black.png)
+![Nez](Nez.github.io/static/img/logo.svg)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/prime31/Nez?branch=master&svg=true)](https://ci.appveyor.com/project/prime31/nez/branch/master)
 [![NuGet version](https://img.shields.io/nuget/v/Nez.svg)](https://www.nuget.org/packages/Nez)
 [![NuGet downloads](https://img.shields.io/nuget/dt/Nez.svg)](https://www.nuget.org/packages/Nez)
 [![Join the chat](https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat)](https://discord.gg/uFtGHNv)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fprime31.github.io%2FNez%2F)](https://prime31.github.io/Nez/)
 
+> See partial zh-cn translation at [README.cn.md](./README.cn.md) 部分中文翻译见 [README.cn.md](./README.cn.md)
 
 Nez aims to be a feature-rich 2D framework that sits on top of MonoGame/FNA. It provides a solid base for you to build a 2D game on. Some of the many features it includes are:
 
-- Scene/Entity/Component system with Component render layer tracking and optional entity systems (an implementation that operates on a group of entities that share a specific set of components)
+- Scene/Entity/Component system with Component render layer tracking
 - SpatialHash for super fast broadphase physics lookups. You won't ever see it since it works behind the scenes but you'll love it nonetheless since it makes finding everything in your proximity crazy fast via raycasts or overlap checks.
 - AABB, circle and polygon collision/trigger detection
 - Farseer Physics (based on Box2D) integration for when you need a full physics simulation
@@ -64,22 +66,17 @@ Setup
 - create a `Monogame Cross Platform Desktop Project`
 - clone or download the Nez repository
 - add the `Nez.Portable/Nez.csproj` project to your solution and add a reference to it in your main project
+  - if you are working with MonoGame 3.8, use `Nez.Portable/Nez.MG38.csproj` instead
 - make your main Game class (`Game1.cs` in a default project) subclass `Nez.Core`
 
 If you intend to use any of the built in Effects or PostProcessors you should also copy or link the `DefaultContent/effects` folder into your projects `Content/nez/effects` folder and the `DefaultContent/textures` folder into `Content/nez/textures`. Be sure to set the Build Action to Content and enable the "Copy to output directory" property so they get copied into your compiled game. See the Nez.Samples csproj for an example on how to do this.
 
 Note: if you get compile errors referencing a missing `project.assets.json` file run `msbuild Nez.sln /t:restore` in the root Nez folder to restore them.
 
-If you are using a .NET Core main application and want to switch the Nez projects over to .NET Standard 2.0, run the following command in a terminal. On Windows it will require the linux subsystem terminal: `find . -path Tests -prune -o -name 'Nez*.csproj' | grep -v Tests | grep -v Pipeline | xargs perl -pi -e 's/net471/netstandard2.0/g'`  You will also need to update the NuGet references in the Nez csproj files to point at the MonoGame dotnet Core versions. 
-
 
 ### Install through NuGet:
 
-Note that using the NuGet packages isn't recommended. The source code has been carefully commented and contains a wealth of useful information. Use the NuGet packages to give Nez a test and if you like it consider switching to using the source code.
-
-Add [Nez](https://www.nuget.org/packages/Nez/) to your project's NuGet packages. Optionally add the Nez.FarseerPhysics and Nez.Persistence NuGet packages.
-
-Installing through NuGet, the contents of the `DefaultContent` content folder is also included in the package. You will find them under `packages/Nez.{VERSION}/tools`.
+The NuGet packages are long since deprecated. The source code has been carefully commented and contains a wealth of useful information. Use the source.
 
 ---
 
@@ -93,6 +90,7 @@ Samples Repository
 ==========
 You can find the samples repo [here](https://github.com/prime31/Nez-Samples). It contains a variety of sample scenes that demonstrate the basics of getting stuff done with Nez. [This YouTube playlist](https://www.youtube.com/playlist?list=PLb8LPjN5zpx0ZerxdoVarLKlWJ1_-YD9M) also has a few relevant videos.
 
+For reference, you can also access Nez's documentation [here](https://prime31.github.io/Nez/).
 
 
 Using Nez with FNA
@@ -122,7 +120,7 @@ Bits and pieces of Nez were cherry-picked from various places around the interne
 
 I want to extend a special thanks to three people and their repos listed below. The Monocle Engine and MonoGame.Extended allowed me to get up and running with MonoGame nearly instantly when I was first evaluating if it would be a good alternative to use for making games. [libGDX](https://github.com/libgdx/libgdx) scene2D UI was ported over to Nez to get a jump start on a UI as well. Nez uses a bunch of concepts and code from all three of these repos.
 
-Matt Thorson's fantastic [Monocle Engine](https://bitbucket.org/MattThorson/monocle-engine)
+Maddy Thorson's fantastic Monocle Engine
 
 Dylan Wilson's excellent [MonoGame.Extended](https://github.com/craftworkgames/MonoGame.Extended) and his initial work on converted [Farseer Physics Engine](https://farseerphysics.codeplex.com/) to a Portable Class Library. Farseer is [Microsoft Permissive v1.1](https://farseerphysics.codeplex.com/license) licensed.
 

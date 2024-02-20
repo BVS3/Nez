@@ -16,6 +16,8 @@ namespace Nez
 		/// </summary>
 		public int[] LayerIndicesToRender;
 
+		public bool AutoUpdateTilesets = true;
+
 		public override float Width => TiledMap.Width * TiledMap.TileWidth;
 		public override float Height => TiledMap.Height * TiledMap.TileHeight;
 
@@ -28,6 +30,7 @@ namespace Nez
 		public TiledMapRenderer(TmxMap tiledMap, string collisionLayerName = null, bool shouldCreateColliders = true)
 		{
 			TiledMap = tiledMap;
+
 			_shouldCreateColliders = shouldCreateColliders;
 
 			if (collisionLayerName != null)
@@ -68,7 +71,7 @@ namespace Nez
 		public int GetColumnAtWorldPosition(float xPos)
 		{
 			xPos -= Entity.Transform.Position.X + _localOffset.X;
-			return TiledMap.WorldToTilePositionY(xPos);
+			return TiledMap.WorldToTilePositionX(xPos);
 		}
 
 		/// <summary>
@@ -118,13 +121,17 @@ namespace Nez
 
 		public override void OnRemovedFromEntity() => RemoveColliders();
 
-		void IUpdatable.Update() => TiledMap.Update();
+		public virtual void Update()
+		{
+			if (AutoUpdateTilesets)
+				TiledMap.Update();
+		}
 
 		public override void Render(Batcher batcher, Camera camera)
 		{
 			if (LayerIndicesToRender == null)
 			{
-				TiledRendering.RenderMap(TiledMap, batcher, Entity.Transform.Position + _localOffset, Transform.Scale, LayerDepth);
+				TiledRendering.RenderMap(TiledMap, batcher, Entity.Transform.Position + _localOffset, Transform.Scale, LayerDepth, camera.Bounds);
 			}
 			else
 			{

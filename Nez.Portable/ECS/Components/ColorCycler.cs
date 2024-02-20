@@ -69,7 +69,8 @@ namespace Nez
 			originalIntensity = originalColor.A;
 		}
 
-		void IUpdatable.Update()
+
+		public virtual void Update()
 		{
 			var color = _spriteRenderer.Color;
 
@@ -79,18 +80,18 @@ namespace Nez
 					color = originalColor * EvaluateWaveFunction();
 					break;
 				case Colorchannels.Red:
-					color = new Color((int)(originalColor.R * EvaluateWaveFunction()), color.G, color.B, color.A);
+					color = new Color((int) (originalColor.R * EvaluateWaveFunction()), color.G, color.B, color.A);
 					break;
 				case Colorchannels.Green:
-					color = new Color(color.R, (int)(originalColor.G * EvaluateWaveFunction()), color.B, color.A);
+					color = new Color(color.R, (int) (originalColor.G * EvaluateWaveFunction()), color.B, color.A);
 					break;
 				case Colorchannels.Blue:
-					color = new Color(color.R, color.G, (int)(originalColor.B * EvaluateWaveFunction()), color.A);
+					color = new Color(color.R, color.G, (int) (originalColor.B * EvaluateWaveFunction()), color.A);
 					break;
 			}
 
 			if (AffectsIntensity)
-				color.A = (byte)(originalIntensity * EvaluateWaveFunction());
+				color.A = (byte) (originalIntensity * EvaluateWaveFunction());
 			else
 				color.A = originalColor.A;
 

@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Nez.PhysicsShapes;
-using System;
 
 
 namespace Nez
@@ -114,12 +114,12 @@ namespace Nez
 		{
 			if (_localOffset != offset)
 			{
-				if (Enabled)
+				if(Enabled)
 					UnregisterColliderWithPhysicsSystem();
 				_localOffset = offset;
 				_localOffsetLength = _localOffset.Length();
 				_isPositionDirty = true;
-				if (Enabled)
+				if(Enabled)
 					RegisterColliderWithPhysicsSystem();
 			}
 
@@ -185,7 +185,7 @@ namespace Nez
 			}
 
 			_isParentEntityAddedToScene = true;
-			if (Enabled)
+			if(Enabled)
 				RegisterColliderWithPhysicsSystem();
 		}
 
@@ -239,7 +239,7 @@ namespace Nez
 		public virtual void RegisterColliderWithPhysicsSystem()
 		{
 			// entity could be null if properties such as origin are changed before we are added to an Entity
-			if (_isParentEntityAddedToScene && !_isColliderRegistered)
+			if (_isParentEntityAddedToScene && !_isColliderRegistered && Enabled)
 			{
 				Physics.AddCollider(this);
 				_isColliderRegistered = true;

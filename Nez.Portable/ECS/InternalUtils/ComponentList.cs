@@ -105,12 +105,6 @@ namespace Nez
 				// deal with IUpdatable
 				if (component is IUpdatable)
 					_updatableComponents.Remove(component as IUpdatable);
-
-				if (Core.entitySystemsEnabled)
-				{
-					_entity.componentBits.Set(ComponentTypeManager.GetIndexFor(component.GetType()), false);
-					_entity.Scene.EntityProcessors.OnComponentRemoved(_entity);
-				}
 			}
 		}
 
@@ -124,12 +118,6 @@ namespace Nez
 
 				if (component is IUpdatable)
 					_updatableComponents.Add(component as IUpdatable);
-
-				if (Core.entitySystemsEnabled)
-				{
-					_entity.componentBits.Set(ComponentTypeManager.GetIndexFor(component.GetType()));
-					_entity.Scene.EntityProcessors.OnComponentAdded(_entity);
-				}
 			}
 		}
 
@@ -162,12 +150,6 @@ namespace Nez
 
 					if (component is IUpdatable)
 						_updatableComponents.Add(component as IUpdatable);
-
-					if (Core.entitySystemsEnabled)
-					{
-						_entity.componentBits.Set(ComponentTypeManager.GetIndexFor(component.GetType()));
-						_entity.Scene.EntityProcessors.OnComponentAdded(_entity);
-					}
 
 					_components.Add(component);
 					_tempBufferList.Add(component);
@@ -208,12 +190,6 @@ namespace Nez
 			if (component is IUpdatable)
 				_updatableComponents.Remove(component as IUpdatable);
 
-			if (Core.entitySystemsEnabled)
-			{
-				_entity.componentBits.Set(ComponentTypeManager.GetIndexFor(component.GetType()), false);
-				_entity.Scene.EntityProcessors.OnComponentRemoved(_entity);
-			}
-
 			component.OnRemovedFromEntity();
 			component.Entity = null;
 		}
@@ -226,7 +202,7 @@ namespace Nez
 		/// <param name="onlyReturnInitializedComponents">If set to <c>true</c> only return initialized components.</param>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T GetComponent<T>(bool onlyReturnInitializedComponents) where T : Component
+		public T GetComponent<T>(bool onlyReturnInitializedComponents) where T : class
 		{
 			for (var i = 0; i < _components.Length; i++)
 			{
@@ -317,7 +293,8 @@ namespace Nez
 		internal void OnEntityEnabled()
 		{
 			for (var i = 0; i < _components.Length; i++)
-				_components.Buffer[i].OnEnabled();
+				if(_components.Buffer[i].Enabled)
+					_components.Buffer[i].OnEnabled();
 		}
 
 		internal void OnEntityDisabled()

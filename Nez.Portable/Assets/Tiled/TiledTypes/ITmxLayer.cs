@@ -11,6 +11,8 @@ namespace Nez.Tiled
 		float ParallaxFactorY { get; }
 		float Opacity { get; }
 		bool Visible { get; }
+		float ParallaxFactorX { get; }
+		float ParallaxFactorY { get; }
 		Dictionary<string, string> Properties { get; }
 	}
 }

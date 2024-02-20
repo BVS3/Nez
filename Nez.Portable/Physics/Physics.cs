@@ -252,9 +252,7 @@ namespace Nez
 		/// </summary>
 		/// <returns>The neighbors excluding self.</returns>
 		/// <param name="collider">Collider.</param>
-		//public static IEnumerable<Collider> BoxcastBroadphaseExcludingSelf(Collider collider, int layerMask = AllLayers)
 		public static HashSet<Collider> BoxcastBroadphaseExcludingSelf(Collider collider, int layerMask = AllLayers)
-
 		{
 			var bounds = collider.Bounds;
 			return _spatialHash.AabbBroadphase(ref bounds, collider, layerMask);

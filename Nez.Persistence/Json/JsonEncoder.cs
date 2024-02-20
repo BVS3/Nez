@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -46,7 +46,7 @@ namespace Nez.Persistence
 		{
 			WriteValueDelimiter();
 			EncodeString(key);
-            AppendColon();
+			AppendColon();
 			EncodeValue(value);
 		}
 
@@ -106,11 +106,7 @@ namespace Nez.Persistence
 			         value is ulong ||
 			         value is decimal)
 			{
-				try
-				{
-					_builder.Append(Convert.ToString(value, CultureInfo.InvariantCulture));
-				}
-				catch { }
+				_builder.Append(Convert.ToString(value, CultureInfo.InvariantCulture));
 				return;
 			}
 			else
@@ -122,6 +118,7 @@ namespace Nez.Persistence
 		void EncodeString(string value)
 		{
 			_builder.Append('\"');
+
 			var charArray = value.ToCharArray();
 			foreach (var c in charArray)
 			{
@@ -205,7 +202,14 @@ namespace Nez.Persistence
 				WriteValueDelimiter();
 				EncodeString(field.Name);
 				AppendColon();
-				EncodeValue(field.GetValue(value));
+
+				var fieldValue = field.GetValue(value);
+				bool forceTypeHintForField = false;
+				if(fieldValue != null && _settings.TypeNameHandling == TypeNameHandling.Auto)
+					if(field.FieldType != fieldValue.GetType())
+						forceTypeHintForField = true;
+				
+				EncodeValue(fieldValue, forceTypeHintForField);
 			}
 
 			foreach (var property in _cacheResolver.GetEncodablePropertiesForType(type))
@@ -258,13 +262,19 @@ namespace Nez.Persistence
 			if (!forceTypeHint && _settings.TypeNameHandling == TypeNameHandling.Auto)
 			{
 				var listType = value.GetType();
-				foreach (Type interfaceType in listType.GetInterfaces())
+				if(listType.IsArray)
 				{
-					if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IList<>))
+					listItemType = listType.GetElementType();
+				}
+				else
+				{
+					foreach (Type interfaceType in listType.GetInterfaces())
 					{
-						try { listItemType = listType.GetGenericArguments()[0]; }
-						catch { }
-						break;
+						if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IList<>))
+						{
+							listItemType = listType.GetGenericArguments()[0];
+							break;
+						}
 					}
 				}
 			}
@@ -274,7 +284,7 @@ namespace Nez.Persistence
 			foreach (var obj in value)
 			{
 				WriteValueDelimiter();
-				forceTypeHint = forceTypeHint || (listItemType != null && listItemType != obj.GetType());
+				forceTypeHint = forceTypeHint || (listItemType != null && listItemType != obj?.GetType());
 				EncodeValue(obj, forceTypeHint);
 			}
 

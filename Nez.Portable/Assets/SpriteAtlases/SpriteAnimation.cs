@@ -1,16 +1,24 @@
-﻿using Nez.Textures;
-
-namespace Nez.Sprites
+﻿namespace Nez.Sprites
 {
-	public class SpriteAnimation
-	{
-		public Sprite[] Sprites;
-		public float FrameRate;
+    public class SpriteAnimation
+    {
+        public readonly Sprite[] Sprites;
+        public float[] FrameRates;
 
-		public SpriteAnimation(Sprite[] sprites, float frameRate)
-		{
-			Sprites = sprites;
-			FrameRate = frameRate;
-		}
-	}
+        public SpriteAnimation(Sprite[] sprites, float frameRate)
+        {
+            Sprites = sprites;
+            FrameRates = new float[sprites.Length];
+            for (int i = 0; i < FrameRates.Length; ++i)
+            {
+                FrameRates[i] = frameRate;
+            }
+        }
+
+        public SpriteAnimation(Sprite[] sprites, float[] frameRates)
+        {
+            Sprites = sprites;
+            FrameRates = frameRates;
+        }
+    }
 }

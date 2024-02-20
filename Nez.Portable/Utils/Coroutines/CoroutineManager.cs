@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections;
 
 
@@ -68,6 +68,42 @@ namespace Nez.Systems
 
 		List<CoroutineImpl> _unblockedCoroutines = new List<CoroutineImpl>();
 		List<CoroutineImpl> _shouldRunNextFrame = new List<CoroutineImpl>();
+
+
+		/// <summary>
+		/// Stops all active coroutines. Can be safely called from inside a coroutine, though the coroutine will continue executing
+		/// until the next yield. Some coroutines might not be returned to the pool for reuse until the next Update() cycle.
+		/// </summary>
+		public void StopAllCoroutines()
+		{
+			for (var i = 0; i < _unblockedCoroutines.Count; i++)
+				_unblockedCoroutines[i].IsDone = true;
+			for (var i = 0; i < _shouldRunNextFrame.Count; i++)
+				_shouldRunNextFrame[i].IsDone = true;
+		}
+
+
+		/// <summary>
+		/// Immediately clears all coroutines and returns them to the pool for reuse. Do not to call this from inside one of 
+		/// the manager's coroutines.
+		/// </summary>
+		public void ClearAllCoroutines()
+		{
+			if(_isInUpdate)
+			{
+				throw new System.Exception("Cannot call ClearAllCoroutines() while CoroutineManager is updating.");
+			}
+			else
+			{
+				for (var i = 0; i < _unblockedCoroutines.Count; i++)
+					Pool<CoroutineImpl>.Free(_unblockedCoroutines[i]);
+				for (var i = 0; i < _shouldRunNextFrame.Count; i++)
+					Pool<CoroutineImpl>.Free(_shouldRunNextFrame[i]);
+				
+				_unblockedCoroutines.Clear();
+				_shouldRunNextFrame.Clear();
+			}
+		}
 
 
 		/// <summary>
@@ -169,6 +205,12 @@ namespace Nez.Systems
 			if (coroutine.Enumerator.Current is WaitForSeconds)
 			{
 				coroutine.WaitTimer = (coroutine.Enumerator.Current as WaitForSeconds).waitTime;
+				return true;
+			}
+
+			if (coroutine.Enumerator.Current is IEnumerator enumerator)
+			{
+				coroutine.WaitForCoroutine = StartCoroutine(enumerator) as CoroutineImpl;
 				return true;
 			}
 

@@ -82,6 +82,11 @@ namespace Nez.Sprites
 		public bool IsRunning => AnimationState == State.Running;
 		public bool IsPaused => AnimationState == State.Paused;
 
+		/// <summary>
+		/// Provides access to list of available animations
+		/// </summary>
+		public Dictionary<string, SpriteAnimation> Animations { get { return _animations; } }
+
 		readonly Dictionary<string, SpriteAnimation> _animations = new Dictionary<string, SpriteAnimation>();
 
 		public Dictionary<string, SpriteAnimation> Animations { get { return _animations; } }
@@ -97,13 +102,13 @@ namespace Nez.Sprites
 
 		public SpriteAnimator(Sprite sprite) => SetSprite(sprite);
 
-		void IUpdatable.Update()
+		public virtual void Update()
 		{
 			if (AnimationState != State.Running || CurrentAnimation == null)
 				return;
 
 			var animation = CurrentAnimation;
-			var secondsPerFrame = 1 / (animation.FrameRate * Speed);
+			var secondsPerFrame = 1 / (animation.FrameRates[CurrentFrame] * Speed);
 			var iterationDuration = secondsPerFrame * animation.Sprites.Length;
 			var pingPongIterationDuration = animation.Sprites.Length < 3 ? iterationDuration : secondsPerFrame * (animation.Sprites.Length * 2 - 2);
 

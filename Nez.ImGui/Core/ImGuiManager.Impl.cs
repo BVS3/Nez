@@ -122,8 +122,40 @@ namespace Nez.ImGuiTools
 
 			if (!ImGui.IsWindowFocused())
 			{
-				Input.SetCurrentKeyboardState(new KeyboardState());
-				Input.SetCurrentMouseState(new MouseState());
+				bool focusedWindow = false;
+
+				// if the window's being hovered and we click on it with any mouse button, optionally focus the window.
+				if (ImGui.IsWindowHovered())
+				{
+					if (ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+					|| (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && FocusGameWindowOnRightClick)
+					|| (ImGui.IsMouseClicked(ImGuiMouseButton.Middle) && FocusGameWindowOnMiddleClick))
+					{
+						ImGui.SetWindowFocus();
+						focusedWindow = true;
+					}
+				}
+
+				// if we failed to focus the window in the previous step, intercept mouse and keyboard input.
+				if (!focusedWindow)
+				{
+					var mouseState = new MouseState(
+						Input.CurrentMouseState.X,
+						Input.CurrentMouseState.Y,
+						DisableMouseWheelWhenGameWindowUnfocused ? 0 : Input.MouseWheel,
+						ButtonState.Released,
+						ButtonState.Released,
+						ButtonState.Released,
+						ButtonState.Released,
+						ButtonState.Released
+					);
+					Input.SetCurrentMouseState(mouseState);
+
+					if (DisableKeyboardInputWhenGameWindowUnfocused)
+					{
+						Input.SetCurrentKeyboardState(new KeyboardState());
+					}
+				}
 			}
 
 			ImGui.End();
@@ -285,7 +317,7 @@ namespace Nez.ImGuiTools
 				// we cant draw the game window until we have the texture bound so we append it here
 				ImGui.Begin(_gameWindowTitle, _gameWindowFlags);
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-				ImGui.ImageButton(_renderTargetId, ImGui.GetContentRegionAvail());
+				ImGui.ImageButton("SeparateGameWindowImageButton", _renderTargetId, ImGui.GetContentRegionAvail());
 				ImGui.PopStyleVar();
 				ImGui.End();
 
@@ -345,7 +377,7 @@ namespace Nez.ImGuiTools
 		#endregion
 
 		[Console.Command("toggle-imgui", "Toggles the Dear ImGui renderer")]
-		static void ToggleImGui()
+		public static void ToggleImGui()
 		{
 			// install the service if it isnt already there
 			var service = Core.GetGlobalManager<ImGuiManager>();

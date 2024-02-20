@@ -58,8 +58,6 @@ namespace Nez.Tiled
 				var tileset = ParseTmxTileset(map, e, map.TmxDirectory);
 				map.Tilesets.Add(tileset);
 
-				Debug.Log(tileset.Name);
-
 				UpdateMaxTileSizes(tileset);
 			}
 
@@ -82,10 +80,8 @@ namespace Nez.Tiled
 				var tile = kvPair.Value;
 				if (tile.Image != null)
 				{
-					if (tile.Image.Width > tileset.Map.MaxTileWidth)
-						tileset.Map.MaxTileWidth = tile.Image.Width;
-					if (tile.Image.Height > tileset.Map.MaxTileHeight)
-						tileset.Map.MaxTileHeight = tile.Image.Height;
+					if (tile.Image.Width > tileset.Map.MaxTileWidth) tileset.Map.MaxTileWidth = tile.Image.Width;
+					if (tile.Image.Height > tileset.Map.MaxTileHeight) tileset.Map.MaxTileHeight = tile.Image.Height;
 				}
 			}
 
@@ -94,10 +90,8 @@ namespace Nez.Tiled
 				var region = kvPair.Value;
 				var width = (int)region.Width;
 				var height = (int)region.Height;
-				if (width > tileset.Map.MaxTileWidth)
-					tileset.Map.MaxTileWidth = width;
-				if (width > tileset.Map.MaxTileHeight)
-					tileset.Map.MaxTileHeight = height;
+				if (width > tileset.Map.MaxTileWidth) tileset.Map.MaxTileWidth = width;
+				if (width > tileset.Map.MaxTileHeight) tileset.Map.MaxTileHeight = height;
 			}
 		}
 
@@ -164,8 +158,9 @@ namespace Nez.Tiled
 				{
 					var xDocTileset = XDocument.Load(stream);
 
-					var tileset = new TmxTileset().LoadTmxTileset(map, xDocTileset.Element("tileset"), firstGid, tmxDir);
-					tileset.TmxDirectory = Path.GetDirectoryName(source);
+					string tsxDir = Path.GetDirectoryName(source);
+					var tileset = new TmxTileset().LoadTmxTileset(map, xDocTileset.Element("tileset"), firstGid, tsxDir);
+					tileset.TmxDirectory = tsxDir;
 
 					return tileset;
 				}
@@ -413,14 +408,85 @@ namespace Nez.Tiled
 
 		public static TmxObject LoadTmxObject(this TmxObject obj, TmxMap map, XElement xObject)
 		{
-			obj.Id = (int?)xObject.Attribute("id") ?? 0;
-			obj.Name = (string)xObject.Attribute("name") ?? string.Empty;
+			// Check for template
+			string template = (string)xObject.Attribute("template");
+			if (template != null)
+			{
+				// Prepend the parent TMX directory
+				template = Path.Combine(map.TmxDirectory, template);
+
+				// Everything else is in the TX file
+				using (var stream = TitleContainer.OpenStream(template))
+				{
+					var xDocTemplate = XDocument.Load(stream);
+
+					string tsxDir = Path.GetDirectoryName(template);
+					obj = new TmxObject().LoadTmxObjectFromTemplate(map, xDocTemplate.Element("template").Element("object"));
+				}
+			}
+
+			obj.Id = (int?)xObject.Attribute("id") ?? (int?)obj.Id ?? 0;
+			obj.Name = (string)xObject.Attribute("name") ?? obj.Name ?? string.Empty;
 			obj.X = (float)xObject.Attribute("x");
 			obj.Y = (float)xObject.Attribute("y");
+			obj.Width = (float?)xObject.Attribute("width") ?? (float?)obj.Width ?? 0.0f;
+			obj.Height = (float?)xObject.Attribute("height") ?? (float?)obj.Height ?? 0.0f;
+			obj.Type = (string)xObject.Attribute("type") ?? (string)xObject.Attribute("class") ?? string.Empty;
+			obj.Visible = (bool?)xObject.Attribute("visible") ?? true;
+			obj.Rotation = (float?)xObject.Attribute("rotation") ?? (float?)obj.Rotation ?? 0.0f;
+
+			// Assess object type and assign appropriate content
+			var xGid = xObject.Attribute("gid");
+			var xEllipse = xObject.Element("ellipse");
+			var xPolygon = xObject.Element("polygon");
+			var xPolyline = xObject.Element("polyline");
+			var xText = xObject.Element("text");
+			var xPoint = xObject.Element("point");
+
+			if (xGid != null)
+			{
+				obj.Tile = new TmxLayerTile(map, (uint)xGid, Convert.ToInt32(Math.Round(obj.X)), Convert.ToInt32(Math.Round(obj.Y)));
+				obj.ObjectType = TmxObjectType.Tile;
+			}
+			else if (xEllipse != null)
+			{
+				obj.ObjectType = TmxObjectType.Ellipse;
+			}
+			else if (xPolygon != null)
+			{
+				obj.Points = ParsePoints(xPolygon);
+				obj.ObjectType = TmxObjectType.Polygon;
+			}
+			else if (xPolyline != null)
+			{
+				obj.Points = ParsePoints(xPolyline);
+				obj.ObjectType = TmxObjectType.Polyline;
+			}
+			else if (xText != null)
+			{
+				obj.Text = new TmxText().LoadTmxText(xText);
+				obj.ObjectType = TmxObjectType.Text;
+			}
+			else if (xPoint != null)
+			{
+				obj.ObjectType = TmxObjectType.Point;
+			}
+			else if (template != null) // If it had a template attribute it must have been an object
+			{
+				obj.ObjectType = TmxObjectType.Basic;
+			}
+
+			obj.Properties = ParsePropertyDict(xObject.Element("properties"));
+
+			return obj;
+		}
+
+		public static TmxObject LoadTmxObjectFromTemplate(this TmxObject obj, TmxMap map, XElement xObject)
+		{
+			obj.Name = (string)xObject.Attribute("name") ?? string.Empty;
 			obj.Width = (float?)xObject.Attribute("width") ?? 0.0f;
 			obj.Height = (float?)xObject.Attribute("height") ?? 0.0f;
 			obj.Type = (string)xObject.Attribute("type") ?? (string)xObject.Attribute("class") ?? string.Empty;
-			obj.Visible = (bool?)xObject.Attribute("visible") ?? true;
 			obj.Rotation = (float?)xObject.Attribute("rotation") ?? 0.0f;
 
 			// Assess object type and assign appropriate content
@@ -551,7 +617,7 @@ namespace Nez.Tiled
 			return group;
 		}
 
-		public static TmxTileset LoadTmxTileset(this TmxTileset tileset, TmxMap map, XElement xTileset, int firstGid, string tmxDir)
+		public static TmxTileset LoadTmxTileset(this TmxTileset tileset, TmxMap map, XElement xTileset, int firstGid, string tsxDir)
 		{
 			tileset.Map = map;
 			tileset.FirstGid = firstGid;
@@ -567,7 +633,7 @@ namespace Nez.Tiled
 
 			var xImage = xTileset.Element("image");
 			if (xImage != null)
-				tileset.Image = new TmxImage().LoadTmxImage(xImage, tmxDir);
+				tileset.Image = new TmxImage().LoadTmxImage(xImage, tsxDir);
 
 			var xTerrainType = xTileset.Element("terraintypes");
 			if (xTerrainType != null)
@@ -580,7 +646,7 @@ namespace Nez.Tiled
 			tileset.Tiles = new Dictionary<int, TmxTilesetTile>();
 			foreach (var xTile in xTileset.Elements("tile"))
 			{
-				var tile = new TmxTilesetTile().LoadTmxTilesetTile(tileset, xTile, tileset.Terrains, tmxDir);
+				var tile = new TmxTilesetTile().LoadTmxTilesetTile(tileset, xTile, tileset.Terrains, tsxDir);
 				tileset.Tiles[tile.Id] = tile;
 			}
 
