@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Nez.Systems;
 using Nez.Textures;
-using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 
 namespace Nez
@@ -567,13 +567,13 @@ namespace Nez
 		{
 			var designSize = _designResolutionSize;
 			var screenSize = new Point(Screen.Width, Screen.Height);
-			var screenAspectRatio = (float)screenSize.X / (float)screenSize.Y;
+			var screenAspectRatio = screenSize.X / (float)screenSize.Y;
 
 			var renderTargetWidth = screenSize.X;
 			var renderTargetHeight = screenSize.Y;
 
-			var resolutionScaleX = (float)screenSize.X / (float)designSize.X;
-			var resolutionScaleY = (float)screenSize.Y / (float)designSize.Y;
+			var resolutionScaleX = screenSize.X / (float)designSize.X;
+			var resolutionScaleY = screenSize.Y / (float)designSize.Y;
 
 			var rectCalculated = false;
 
@@ -581,7 +581,7 @@ namespace Nez
 			PixelPerfectScale = 1;
 			if (_resolutionPolicy != SceneResolutionPolicy.None)
 			{
-				if ((float)designSize.X / (float)designSize.Y > screenAspectRatio)
+				if (designSize.X / (float)designSize.Y > screenAspectRatio)
 					PixelPerfectScale = screenSize.X / designSize.X;
 				else
 					PixelPerfectScale = screenSize.Y / designSize.Y;
@@ -617,14 +617,14 @@ namespace Nez
 
 					// we are going to do some cropping so we need to use floats for the scale then round up
 					PixelPerfectScale = 1;
-					if ((float)designSize.X / (float)designSize.Y < screenAspectRatio)
+					if (designSize.X / (float)designSize.Y < screenAspectRatio)
 					{
-						var floatScale = (float)screenSize.X / (float)designSize.X;
+						var floatScale = screenSize.X / (float)designSize.X;
 						PixelPerfectScale = Mathf.CeilToInt(floatScale);
 					}
 					else
 					{
-						var floatScale = (float)screenSize.Y / (float)designSize.Y;
+						var floatScale = screenSize.Y / (float)designSize.Y;
 						PixelPerfectScale = Mathf.CeilToInt(floatScale);
 					}
 
@@ -1081,9 +1081,6 @@ namespace Nez
 		public List<T> FindComponentsOfType<T>() where T : Component => Entities.FindComponentsOfType<T>();
 
 		#endregion
-<<<<<<< HEAD
-=======
-
 
 		#region Entity System Processors
 
@@ -1113,6 +1110,5 @@ namespace Nez
 		public T GetEntityProcessor<T>() where T : EntitySystem => EntityProcessors.GetProcessor<T>();
 
 		#endregion
->>>>>>> parent of 2db35eb0... BREAKING CHANGE: optional ECS removed
 	}
 }

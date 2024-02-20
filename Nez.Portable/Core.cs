@@ -1,14 +1,14 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections;
-using Nez.Systems;
-using Nez.Console;
-using Nez.Tweens;
-using Nez.Timers;
+using Microsoft.Xna.Framework.Input;
 using Nez.BitmapFonts;
+using Nez.Console;
+using Nez.Systems;
 using Nez.Textures;
+using Nez.Timers;
+using Nez.Tweens;
+using System;
+using System.Collections;
 using System.Diagnostics;
 
 
@@ -141,12 +141,10 @@ namespace Nez
 		}
 
 
-<<<<<<< HEAD
-		public Core(int width = 1280, int height = 720, bool isFullScreen = false, string windowTitle = "Nez", string contentDirectory = "Content", bool hardwareModeSwitch = true)
-=======
+
+
 		public Core(int width = 1280, int height = 720, bool isFullScreen = false, bool enableEntitySystems = true,
-		            string windowTitle = "Nez", string contentDirectory = "Content")
->>>>>>> parent of 2db35eb0... BREAKING CHANGE: optional ECS removed
+					string windowTitle = "Nez", string contentDirectory = "Content")
 		{
 #if DEBUG
 			_windowTitle = windowTitle;
@@ -154,7 +152,7 @@ namespace Nez
 
 			_instance = this;
 			Emitter = new Emitter<CoreEvents>(new CoreEventsComparer());
-			
+
 			GraphicsManager = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = width,
@@ -162,7 +160,7 @@ namespace Nez
 				IsFullScreen = isFullScreen,
 				SynchronizeWithVerticalRetrace = true,
 #if MONOGAME_38
-				HardwareModeSwitch = hardwareModeSwitch,
+				HardwareModeSwitch = true,
 				PreferHalfPixelOffset = true
 #endif
 			};

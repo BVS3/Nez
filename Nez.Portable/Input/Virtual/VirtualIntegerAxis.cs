@@ -122,6 +122,8 @@ namespace Nez
 
 		public override void Update()
 		{
+			CalculateGuardCache();
+
 			IsRepeating = false;
 
 			bool check = false;
