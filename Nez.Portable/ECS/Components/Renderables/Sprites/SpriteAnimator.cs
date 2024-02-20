@@ -89,8 +89,6 @@ namespace Nez.Sprites
 
 		readonly Dictionary<string, SpriteAnimation> _animations = new Dictionary<string, SpriteAnimation>();
 
-		public Dictionary<string, SpriteAnimation> Animations { get { return _animations; } }
-
 		float _elapsedTime;
 		LoopMode _loopMode;
 

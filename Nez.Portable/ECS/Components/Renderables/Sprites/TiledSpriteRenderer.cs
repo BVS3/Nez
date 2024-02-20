@@ -1,7 +1,7 @@
-﻿using Nez.Sprites;
-using Nez.Textures;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
+using Nez.Sprites;
+using Nez.Textures;
 
 
 namespace Nez
@@ -61,8 +61,8 @@ namespace Nez
 
 				// recalulcate our inverseTextureScale and the source rect size
 				_inverseTexScale = new Vector2(1f / _textureScale.X, 1f / _textureScale.Y);
-				_sourceRect.Width = (int) (_sprite.SourceRect.Width * _inverseTexScale.X);
-				_sourceRect.Height = (int) (_sprite.SourceRect.Height * _inverseTexScale.Y);
+				_sourceRect.Width = (int)(_sprite.SourceRect.Width * _inverseTexScale.X);
+				_sourceRect.Height = (int)(_sprite.SourceRect.Height * _inverseTexScale.Y);
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace Nez
 				_sourceRect.Height = value;
 			}
 		}
-		public new int SpriteHeight
+		public int SpriteHeight
 		{
 			get => _sourceRect.Height;
 			set

@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace Nez.Tiled
 {
@@ -12,7 +12,7 @@ namespace Nez.Tiled
 		///Added to support removable layers
 		//****************************************
 		//property to multiply layer color by 
-		public float LayerColorFactor { get; set; } 
+		public float LayerColorFactor { get; set; }
 		//****************************************
 
 		public bool Visible { get; set; }
@@ -24,10 +24,6 @@ namespace Nez.Tiled
 		public Vector2 ParallaxFactor => new Vector2(ParallaxFactorX, ParallaxFactorY);
 
 		public Dictionary<string, string> Properties { get; set; }
-
-		public float ParallaxFactorX { get; set; }
-		public float ParallaxFactorY { get; set; }
-		public Vector2 ParallaxFactor => new Vector2(ParallaxFactorX, ParallaxFactorY);
 
 		/// <summary>
 		/// width in tiles for this layer. Always the same as the map width for fixed-size maps.

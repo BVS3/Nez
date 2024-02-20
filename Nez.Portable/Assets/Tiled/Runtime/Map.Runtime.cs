@@ -1,5 +1,5 @@
-using System;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace Nez.Tiled
 {
@@ -137,6 +137,13 @@ namespace Nez.Tiled
 		/// </summary>
 		/// <returns>The to world position.</returns>
 		/// <param name="pos">Position.</param>
+		public Vector2 TileToWorldPosition(Vector2 pos) => new Vector2(TileToWorldPositionX((int)pos.X), TileToWorldPositionY((int)pos.Y));
+
+		/// <summary>
+		/// converts from tile to world position
+		/// </summary>
+		/// <returns>The to world position.</returns>
+		/// <param name="pos">Position.</param>
 		public Vector2 TileToWorldPosition(Point pos)
 		{
 			if (Orientation == OrientationType.Isometric)
@@ -149,7 +156,7 @@ namespace Nez.Tiled
 				return HexagonalTileToWorldPosition(pos);
 			}
 
-			return new Vector2(TileToWorldPositionX((int)pos.X), TileToWorldPositionY((int)pos.Y));
+			return new Vector2(TileToWorldPositionX(pos.X), TileToWorldPositionY(pos.Y));
 		}
 
 		/// <summary>
@@ -160,7 +167,7 @@ namespace Nez.Tiled
 		public int TileToWorldPositionX(int x)
 		{
 			if (Orientation == OrientationType.Isometric ||
-			    Orientation == OrientationType.Hexagonal)
+				Orientation == OrientationType.Hexagonal)
 			{
 				throw new InvalidOperationException(
 					"Cannot convert tile position to world position for isometric or hexagonal maps with just an X coordinate."
@@ -178,7 +185,7 @@ namespace Nez.Tiled
 		public int TileToWorldPositionY(int y)
 		{
 			if (Orientation == OrientationType.Isometric ||
-			    Orientation == OrientationType.Hexagonal)
+				Orientation == OrientationType.Hexagonal)
 			{
 				throw new InvalidOperationException(
 					"Cannot convert tile position to world position for isometric or hexagonal maps with just an Y coordinate."
@@ -187,7 +194,7 @@ namespace Nez.Tiled
 
 			return y * TileHeight;
 		}
-		
+
 		struct OffsetHex
 		{
 			public int q;
