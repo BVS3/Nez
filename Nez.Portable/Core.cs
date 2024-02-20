@@ -89,6 +89,11 @@ namespace Nez
 		/// </summary>
 		internal static Core _instance;
 
+		/// <summary>
+		/// internal flag used to determine if EntitySystems should be used or not
+		/// </summary>
+		internal static bool entitySystemsEnabled;
+
 #if DEBUG
 		internal static long drawCalls;
 		TimeSpan _frameCounterElapsedTime = TimeSpan.Zero;
@@ -136,7 +141,12 @@ namespace Nez
 		}
 
 
+<<<<<<< HEAD
 		public Core(int width = 1280, int height = 720, bool isFullScreen = false, string windowTitle = "Nez", string contentDirectory = "Content", bool hardwareModeSwitch = true)
+=======
+		public Core(int width = 1280, int height = 720, bool isFullScreen = false, bool enableEntitySystems = true,
+		            string windowTitle = "Nez", string contentDirectory = "Content")
+>>>>>>> parent of 2db35eb0... BREAKING CHANGE: optional ECS removed
 		{
 #if DEBUG
 			_windowTitle = windowTitle;
@@ -167,6 +177,8 @@ namespace Nez
 			Content = new NezGlobalContentManager(Services, base.Content.RootDirectory);
 			IsMouseVisible = true;
 			IsFixedTimeStep = false;
+
+			entitySystemsEnabled = enableEntitySystems;
 
 			// setup systems
 			RegisterGlobalManager(_coroutineManager);
