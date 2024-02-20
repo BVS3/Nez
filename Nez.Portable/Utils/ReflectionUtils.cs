@@ -10,7 +10,6 @@ namespace Nez
 	public static class ReflectionUtils
 	{
 		#region Fields
-
 		public static FieldInfo GetFieldInfo(object targetObject, string fieldName) => GetFieldInfo(targetObject.GetType(), fieldName);
 
 		public static FieldInfo GetFieldInfo(Type type, string fieldName)

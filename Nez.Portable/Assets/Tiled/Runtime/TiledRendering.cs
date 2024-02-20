@@ -1,6 +1,6 @@
-using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.CompilerServices;
 
 namespace Nez.Tiled
 {
@@ -30,6 +30,24 @@ namespace Nez.Tiled
 					RenderObjectGroup(tmxObjGroup, batcher, position, scale, layerDepth);
 			}
 		}
+
+
+		public static void RenderMap(TmxMap map, Batcher batcher, Vector2 position, Vector2 scale, float layerDepth, RectangleF cameraClipBounds)
+		{
+			foreach (var layer in map.Layers)
+			{
+				if (layer is TmxLayer tmxLayer && tmxLayer.Visible)
+					RenderLayer(tmxLayer, batcher, position, scale, layerDepth, cameraClipBounds);
+				else if (layer is TmxImageLayer tmxImageLayer && tmxImageLayer.Visible)
+					RenderImageLayer(tmxImageLayer, batcher, position, scale, layerDepth);
+				else if (layer is TmxGroup tmxGroup && tmxGroup.Visible)
+					RenderGroup(tmxGroup, batcher, position, scale, layerDepth);
+				else if (layer is TmxObjectGroup tmxObjGroup && tmxObjGroup.Visible)
+					RenderObjectGroup(tmxObjGroup, batcher, position, scale, layerDepth);
+			}
+		}
+
+
 
 		/// <summary>
 		/// renders the ITmxLayer by calling through to the concrete type's render method
@@ -63,7 +81,8 @@ namespace Nez.Tiled
 			var tileHeight = layer.Map.TileHeight * scale.Y;
 
 			var color = Color.White;
-			color.A = (byte)(layer.Opacity * 255);
+			color *= layer.LayerColorFactor;
+			//				color.A = (byte)(layer.Opacity * 255);
 
 			for (var i = 0; i < layer.Tiles.Length; i++)
 			{
@@ -118,7 +137,8 @@ namespace Nez.Tiled
 
 
 			var color = Color.White;
-			color.A = (byte)(layer.Opacity * 255);
+			color *= layer.LayerColorFactor;
+//				color.A = (byte)(layer.Opacity * 255)
 
 			// loop through and draw all the non-culled tiles
 			for (var y = minY; y <= maxY; y++)
@@ -240,7 +260,11 @@ namespace Nez.Tiled
 
 						var tileset = objGroup.Map.GetTilesetForTileGid(obj.Tile.Gid);
 						var sourceRect = tileset.TileRegions[obj.Tile.Gid];
-						batcher.Draw(tileset.Image.Texture, pos, sourceRect, Color.White, 0, Vector2.Zero, scale, spriteEffects, layerDepth);
+						var tiles = tileset.Tiles;
+
+						var texture = tileset.Image?.Texture ?? tiles[0].Image.Texture;
+
+						batcher.Draw(texture, pos, sourceRect, Color.White, 0, Vector2.Zero, scale, spriteEffects, layerDepth);
 						goto default;
 					case TmxObjectType.Ellipse:
 						pos = new Vector2(obj.X + obj.Width * 0.5f, obj.Y + obj.Height * 0.5f) * scale;

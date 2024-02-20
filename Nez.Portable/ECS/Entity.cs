@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Microsoft.Xna.Framework;
 
 
 namespace Nez
@@ -11,6 +11,10 @@ namespace Nez
 		static uint _idGenerator;
 
 		#region properties and fields
+		/// <summary>
+		/// BVS extended - Controls if update is called each frame or not
+		/// </summary>
+		public bool UpdatesEnabled;
 
 		/// <summary>
 		/// the scene this entity belongs to
@@ -199,6 +203,8 @@ namespace Nez
 
 			if (Core.entitySystemsEnabled)
 				componentBits = new BitSet();
+
+			UpdatesEnabled = true;
 		}
 
 		public Entity() : this(Utils.RandomString(8))
@@ -391,7 +397,11 @@ namespace Nez
 		/// <summary>
 		/// called each frame as long as the Entity is enabled
 		/// </summary>
-		public virtual void Update() => Components.Update();
+		public virtual void Update()
+		{
+			if (UpdatesEnabled)
+				Components.Update();
+		}
 
 		/// <summary>
 		/// called if Core.debugRenderEnabled is true by the default renderers. Custom renderers can choose to call it or not.
@@ -438,6 +448,12 @@ namespace Nez
 		/// <returns>The component.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public T GetComponent<T>() where T : Component => Components.GetComponent<T>(false);
+
+		/// <summary>
+		/// checks to see if the Entity has the component
+		/// </summary>
+		public bool HasComponent<T>() where T : Component => Components.GetComponent<T>(false) != null;
+
 
 		/// <summary>
 		/// Gets the first Component of type T and returns it. If no Component is found the Component will be created.

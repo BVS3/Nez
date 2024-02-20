@@ -91,7 +91,7 @@ namespace Nez
 			// Nez-specific Effects will have a null name. We don't want to try to remove them.
 			if (Effect != null && Effect.Name != null)
 			{
-				_scene.Content.UnloadEffect(Effect);
+				_scene?.Content.UnloadEffect(Effect);
 				Effect = null;
 			}
 

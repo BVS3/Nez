@@ -14,7 +14,6 @@ namespace Nez
 		/// </summary>
 		public int[] RenderLayers;
 
-
 		public RenderLayerRenderer(int renderOrder, params int[] renderLayers) : base(renderOrder, null)
 		{
 			Array.Sort(renderLayers);
@@ -26,7 +25,6 @@ namespace Nez
 		{
 			var cam = Camera ?? scene.Camera;
 			BeginRender(cam);
-
 			for (var i = 0; i < RenderLayers.Length; i++)
 			{
 				var renderables = scene.RenderableComponents.ComponentsWithRenderLayer(RenderLayers[i]);

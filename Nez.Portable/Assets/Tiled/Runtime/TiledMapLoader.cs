@@ -58,18 +58,9 @@ namespace Nez.Tiled
 				var tileset = ParseTmxTileset(map, e, map.TmxDirectory);
 				map.Tilesets.Add(tileset);
 
-				// we have to iterate the dictionary because tile.gid (the key) could be any number in any order
-				foreach (var kvPair in tileset.Tiles)
-				{
-					var tile = kvPair.Value;
-					if (tile.Image != null)
-					{
-						if (tile.Image.Width > map.MaxTileWidth)
-							map.MaxTileWidth = tile.Image.Width;
-						if (tile.Image.Height > map.MaxTileHeight)
-							map.MaxTileHeight = tile.Image.Height;
-					}
-				}
+				Debug.Log(tileset.Name);
+
+				UpdateMaxTileSizes(tileset);
 			}
 
 			map.Layers = new TmxList<ITmxLayer>();
@@ -81,6 +72,33 @@ namespace Nez.Tiled
 			ParseLayers(map, xMap, map, map.Width, map.Height, map.TmxDirectory);
 
 			return map;
+		}
+
+		private static void UpdateMaxTileSizes(TmxTileset tileset)
+		{
+			// we have to iterate the dictionary because tile.gid (the key) could be any number in any order
+			foreach (var kvPair in tileset.Tiles)
+			{
+				var tile = kvPair.Value;
+				if (tile.Image != null)
+				{
+					if (tile.Image.Width > tileset.Map.MaxTileWidth)
+						tileset.Map.MaxTileWidth = tile.Image.Width;
+					if (tile.Image.Height > tileset.Map.MaxTileHeight)
+						tileset.Map.MaxTileHeight = tile.Image.Height;
+				}
+			}
+
+			foreach (var kvPair in tileset.TileRegions)
+			{
+				var region = kvPair.Value;
+				var width = (int)region.Width;
+				var height = (int)region.Height;
+				if (width > tileset.Map.MaxTileWidth)
+					tileset.Map.MaxTileWidth = width;
+				if (width > tileset.Map.MaxTileHeight)
+					tileset.Map.MaxTileHeight = height;
+			}
 		}
 
 		static OrientationType ParseOrientationType(string type)
@@ -300,6 +318,9 @@ namespace Nez.Tiled
 			layer.Visible = (bool?)xLayer.Attribute("visible") ?? true;
 			layer.OffsetX = (float?)xLayer.Attribute("offsetx") ?? 0.0f;
 			layer.OffsetY = (float?)xLayer.Attribute("offsety") ?? 0.0f;
+			layer.ParallaxFactorX = (float?)xLayer.Attribute("parallaxx") ?? 1.0f;
+			layer.ParallaxFactorY = (float?)xLayer.Attribute("parallaxy") ?? 1.0f;
+
 			// TODO: does the width/height passed in ever differ from the TMX layer XML?
 			layer.Width = (int)xLayer.Attribute("width");
 			layer.Height = (int)xLayer.Attribute("height");
@@ -368,6 +389,8 @@ namespace Nez.Tiled
 			group.Visible = (bool?)xObjectGroup.Attribute("visible") ?? true;
 			group.OffsetX = (float?)xObjectGroup.Attribute("offsetx") ?? 0.0f;
 			group.OffsetY = (float?)xObjectGroup.Attribute("offsety") ?? 0.0f;
+			group.ParallaxFactorX = (float?)xObjectGroup.Attribute("parallaxx") ?? 1.0f;
+			group.ParallaxFactorY = (float?)xObjectGroup.Attribute("parallaxy") ?? 1.0f;
 
 			var drawOrderDict = new Dictionary<string, DrawOrderType> {
 				{"unknown", DrawOrderType.UnknownOrder},
@@ -396,7 +419,7 @@ namespace Nez.Tiled
 			obj.Y = (float)xObject.Attribute("y");
 			obj.Width = (float?)xObject.Attribute("width") ?? 0.0f;
 			obj.Height = (float?)xObject.Attribute("height") ?? 0.0f;
-			obj.Type = (string)xObject.Attribute("type") ?? string.Empty;
+			obj.Type = (string)xObject.Attribute("type") ?? (string)xObject.Attribute("class") ?? string.Empty;
 			obj.Visible = (bool?)xObject.Attribute("visible") ?? true;
 			obj.Rotation = (float?)xObject.Attribute("rotation") ?? 0.0f;
 
@@ -492,6 +515,8 @@ namespace Nez.Tiled
 			layer.Opacity = (float?)xImageLayer.Attribute("opacity") ?? 1.0f;
 			layer.OffsetX = (float?)xImageLayer.Attribute("offsetx") ?? 0.0f;
 			layer.OffsetY = (float?)xImageLayer.Attribute("offsety") ?? 0.0f;
+			layer.ParallaxFactorX = (float?)xImageLayer.Attribute("parallaxx") ?? 1.0f;
+			layer.ParallaxFactorY = (float?)xImageLayer.Attribute("parallaxy") ?? 1.0f;
 
 			var xImage = xImageLayer.Element("image");
 			if (xImage != null)
@@ -510,6 +535,8 @@ namespace Nez.Tiled
 			group.Visible = (bool?)xGroup.Attribute("visible") ?? true;
 			group.OffsetX = (float?)xGroup.Attribute("offsetx") ?? 0.0f;
 			group.OffsetY = (float?)xGroup.Attribute("offsety") ?? 0.0f;
+			group.ParallaxFactorX = (float?)xGroup.Attribute("parallaxx") ?? 1.0f;
+			group.ParallaxFactorY = (float?)xGroup.Attribute("parallaxy") ?? 1.0f;
 
 			group.Properties = ParsePropertyDict(xGroup.Element("properties"));
 

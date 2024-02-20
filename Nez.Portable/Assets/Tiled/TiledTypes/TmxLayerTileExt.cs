@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace Nez.Tiled
 {
@@ -14,7 +15,15 @@ namespace Nez.Tiled
 		/// passthrough to TilesetTile
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsOneWayPlatform(this TmxLayerTile self) => self.TilesetTile != null && self.TilesetTile.IsOneWayPlatform;
+		public static bool IsOneWayPlatform(this TmxLayerTile self) => self != null && self.TilesetTile != null && self.TilesetTile.IsOneWayPlatform;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsPassable(this TmxLayerTile self) => self.TilesetTile != null && self.TilesetTile.IsPassable;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsStaircase(this TmxLayerTile self) => self.TilesetTile != null && self.TilesetTile.IsStaircase;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static List<string> GetPassableDirection(this TmxLayerTile self) { return self.TilesetTile.PassableDirections; }
 
 
 		/// <summary>

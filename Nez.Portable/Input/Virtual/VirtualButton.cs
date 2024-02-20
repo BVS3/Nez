@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 
 namespace Nez
@@ -21,6 +21,7 @@ namespace Nez
 		float _repeatCounter;
 		bool _willRepeat;
 
+		bool _codePress = false;
 
 		public VirtualButton(float bufferTime)
 		{
@@ -61,9 +62,10 @@ namespace Nez
 				IsRepeating = false;
 		}
 
-
 		public override void Update()
 		{
+			CalculateGuardCache();
+
 			_bufferCounter -= Time.UnscaledDeltaTime;
 			IsRepeating = false;
 
@@ -103,6 +105,8 @@ namespace Nez
 					}
 				}
 			}
+
+			_codePress = false;
 		}
 
 
@@ -110,6 +114,11 @@ namespace Nez
 		{
 			get
 			{
+				if (!_guardCache) // Guards prevented input.
+				{
+					return false;
+				}
+
 				foreach (var node in Nodes)
 					if (node.IsDown)
 						return true;
@@ -118,17 +127,27 @@ namespace Nez
 			}
 		}
 
-
 		public bool IsPressed
 		{
+
 			get
 			{
+				if (!_guardCache) // Guards prevented input.
+				{
+					return false;
+				}
+
 				if (_bufferCounter > 0 || IsRepeating)
+					return true;
+
+				if (_codePress)
 					return true;
 
 				foreach (var node in Nodes)
 					if (node.IsPressed)
+					{
 						return true;
+					}
 
 				return false;
 			}
@@ -139,6 +158,11 @@ namespace Nez
 		{
 			get
 			{
+				if (!_guardCache) // Guards prevented input.
+				{
+					return false;
+				}
+
 				foreach (var node in Nodes)
 					if (node.IsReleased)
 						return true;
@@ -151,6 +175,11 @@ namespace Nez
 		public void ConsumeBuffer()
 		{
 			_bufferCounter = 0;
+		}
+
+		public void Press()
+		{
+			_codePress = true;
 		}
 
 

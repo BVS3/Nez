@@ -56,8 +56,9 @@ namespace Nez
 		protected VerticalAlign _verticalAlign;
 		protected IFont _font;
 		protected string _text;
-		Vector2 _size;
+		public Vector2 _size;
 
+		public Vector2 Scale;
 
 		public TextComponent() : this(Graphics.Instance.BitmapFont, "", Vector2.Zero, Color.White)
 		{
@@ -73,6 +74,13 @@ namespace Nez
 			_verticalAlign = VerticalAlign.Top;
 
 			UpdateSize();
+		}
+
+		public override void OnAddedToEntity()
+		{
+			base.OnAddedToEntity();
+
+			Scale = Entity.Transform.Scale;
 		}
 
 
@@ -118,6 +126,7 @@ namespace Nez
 		{
 			_size = _font.MeasureString(_text);
 			UpdateCentering();
+			_areBoundsDirty = true;
 		}
 
 		void UpdateCentering()
@@ -144,7 +153,7 @@ namespace Nez
 		public override void Render(Batcher batcher, Camera camera)
 		{
 			batcher.DrawString(_font, _text, Entity.Transform.Position + _localOffset, Color,
-				Entity.Transform.Rotation, Origin, Entity.Transform.Scale, SpriteEffects, LayerDepth);
+				Entity.Transform.Rotation, Origin, Scale, SpriteEffects, LayerDepth);
 		}
 	}
 }

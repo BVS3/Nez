@@ -100,16 +100,20 @@ namespace Nez.Textures
 		/// <param name="newHeight">New height.</param>
 		public void OnSceneBackBufferSizeChanged(int newWidth, int newHeight)
 		{
-			switch (ResizeBehavior)
+			if (RenderTarget != null)
 			{
-				case RenderTextureResizeBehavior.None:
-					break;
-				case RenderTextureResizeBehavior.SizeToSceneRenderTarget:
-					Resize(newWidth, newHeight);
-					break;
-				case RenderTextureResizeBehavior.SizeToScreen:
-					Resize(Screen.Width, Screen.Height);
-					break;
+
+				switch (ResizeBehavior)
+				{
+					case RenderTextureResizeBehavior.None:
+						break;
+					case RenderTextureResizeBehavior.SizeToSceneRenderTarget:
+						Resize(newWidth, newHeight);
+						break;
+					case RenderTextureResizeBehavior.SizeToScreen:
+						Resize(Screen.Width, Screen.Height);
+						break;
+				}
 			}
 		}
 

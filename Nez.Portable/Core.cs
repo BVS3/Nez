@@ -52,6 +52,11 @@ namespace Nez
 		public new static NezContentManager Content;
 
 		/// <summary>
+		/// Global access to graphicsdevicemanager
+		/// </summary>
+		public static GraphicsDeviceManager GraphicsManager;
+
+		/// <summary>
 		/// default SamplerState used by Materials. Note that this must be set at launch! Changing it after that time will result in only
 		/// Materials created after it was set having the new SamplerState
 		/// </summary>
@@ -146,18 +151,18 @@ namespace Nez
 
 			_instance = this;
 			Emitter = new Emitter<CoreEvents>(new CoreEventsComparer());
-
-			var graphicsManager = new GraphicsDeviceManager(this)
+			
+			GraphicsManager = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = width,
 				PreferredBackBufferHeight = height,
 				IsFullScreen = isFullScreen,
 				SynchronizeWithVerticalRetrace = true
 			};
-			graphicsManager.DeviceReset += OnGraphicsDeviceReset;
-			graphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+			GraphicsManager.DeviceReset += OnGraphicsDeviceReset;
+			GraphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 
-			Screen.Initialize(graphicsManager);
+			Screen.Initialize(GraphicsManager);
 			Window.ClientSizeChanged += OnGraphicsDeviceReset;
 			Window.OrientationChanged += OnOrientationChanged;
 

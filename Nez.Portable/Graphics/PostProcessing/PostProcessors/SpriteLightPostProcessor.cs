@@ -66,7 +66,7 @@ namespace Nez
 		public override void OnSceneBackBufferSizeChanged(int newWidth, int newHeight)
 		{
 			// when the RenderTexture changes we have to reset the shader param since the underlying RenderTarget will be different
-			Effect.Parameters["_lightTexture"].SetValue(_lightsRenderTexture);
+			Effect?.Parameters["_lightTexture"].SetValue(_lightsRenderTexture);
 		}
 	}
 }

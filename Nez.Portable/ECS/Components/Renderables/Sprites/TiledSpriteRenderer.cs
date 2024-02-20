@@ -93,6 +93,15 @@ namespace Nez
 				_sourceRect.Height = value;
 			}
 		}
+		public new int SpriteHeight
+		{
+			get => _sourceRect.Height;
+			set
+			{
+				_areBoundsDirty = true;
+				_sourceRect.Height = value;
+			}
+		}
 
 		/// <summary>
 		/// we keep a copy of the sourceRect so that we dont change the Sprite in case it is used elsewhere

@@ -126,8 +126,18 @@ namespace Nez.ImGuiTools.TypeInspectors
 			if (target == null)
 				return;
 
-			_getter = obj => { return prop.GetMethod.Invoke(obj, null); };
-
+			_getter = obj =>
+			{
+				try
+				{
+					return prop.GetMethod.Invoke(obj, null);
+				}
+				catch (Exception e)
+				{
+					System.Console.WriteLine(e);
+					return null;
+				}
+			};
 			if (!_isReadOnly)
 			{
 				_setter = (val) => { prop.SetMethod.Invoke(target, new object[] {val}); };

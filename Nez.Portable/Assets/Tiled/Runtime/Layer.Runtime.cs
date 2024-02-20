@@ -5,7 +5,7 @@ namespace Nez.Tiled
 {
     public partial class TmxLayer : ITmxLayer
     {
-        /// <summary>
+		/// <summary>
 		/// gets the TmxLayerTile at the x/y coordinates. Note that these are tile coordinates not world coordinates!
 		/// </summary>
 		/// <returns>The tile.</returns>

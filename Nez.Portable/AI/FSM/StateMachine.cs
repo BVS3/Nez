@@ -92,5 +92,17 @@ namespace Nez.AI.FSM
 
 			return _currentState as R;
 		}
+
+		public List<R> GetStates<R>() where R : State<T>
+		{
+			var stateList = new List<State<T>>();
+			foreach (var state in _states)
+			{
+				stateList.Add(state.Value);			
+			}
+
+			return stateList as List<R>;
+		}
+
 	}
 }

@@ -1,6 +1,6 @@
+using Nez.Textures;
 using System;
 using System.Collections.Generic;
-using Nez.Textures;
 
 
 namespace Nez.Sprites
@@ -74,17 +74,22 @@ namespace Nez.Sprites
 		/// <summary>
 		/// index of the current frame in sprite array of the current animation
 		/// </summary>
-		public int CurrentFrame { get; private set; }
+		public int CurrentFrame { get; set; }
 
 		/// <summary>
 		/// checks to see if the CurrentAnimation is running
 		/// </summary>
 		public bool IsRunning => AnimationState == State.Running;
+		public bool IsPaused => AnimationState == State.Paused;
 
 		readonly Dictionary<string, SpriteAnimation> _animations = new Dictionary<string, SpriteAnimation>();
 
+		public Dictionary<string, SpriteAnimation> Animations { get { return _animations; } }
+
 		float _elapsedTime;
 		LoopMode _loopMode;
+
+		public bool IsLooped => (_loopMode == LoopMode.Loop || _loopMode == LoopMode.PingPong);
 
 
 		public SpriteAnimator()
@@ -179,6 +184,7 @@ namespace Nez.Sprites
 		/// </summary>
 		public void Play(string name, LoopMode? loopMode = null)
 		{
+
 			CurrentAnimation = _animations[name];
 			CurrentAnimationName = name;
 			CurrentFrame = 0;

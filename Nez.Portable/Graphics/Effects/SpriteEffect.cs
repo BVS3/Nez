@@ -8,6 +8,11 @@ namespace Nez
 	{
 		EffectParameter _matrixTransformParam;
 
+		public SpriteEffect(byte[] effectCode) : base(Core.GraphicsDevice, effectCode)
+		{
+			_matrixTransformParam = Parameters["MatrixTransform"];
+		}
+
 
 		public SpriteEffect() : base(Core.GraphicsDevice, EffectResource.SpriteEffectBytes)
 		{

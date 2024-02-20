@@ -35,6 +35,8 @@ namespace Nez.Sprites
 		{
 			get => _origin;
 			set => SetOrigin(value);
+
+			
 		}
 
 		/// <summary>

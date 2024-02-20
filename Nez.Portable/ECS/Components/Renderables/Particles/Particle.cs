@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Nez.PhysicsShapes;
 
-
 namespace Nez.Particles
 {
 	/// <summary>
@@ -46,12 +45,14 @@ namespace Nez.Particles
 		/// </summary>
 		bool _collided;
 
-		Vector2 _velocity;
+		bool _collidedOnSlope;
 
+		Vector2 _velocity;
 
 		public void Initialize(ParticleEmitterConfig emitterConfig, Vector2 spawnPosition)
 		{
 			_collided = false;
+			_collidedOnSlope = false;
 
 			// init the position of the Particle. This is based on the source position of the particle emitter
 			// plus a configured variance. The Random.minusOneToOne method allows the number to be both positive
@@ -89,18 +90,18 @@ namespace Nez.Particles
 			_radiusDelta = (endRadius - startRadius) / _timeToLive;
 			_angle = MathHelper.ToRadians(emitterConfig.Angle + emitterConfig.AngleVariance * Random.MinusOneToOne());
 			_degreesPerSecond = MathHelper.ToRadians(emitterConfig.RotatePerSecond +
-			                                         emitterConfig.RotatePerSecondVariance * Random.MinusOneToOne());
+													 emitterConfig.RotatePerSecondVariance * Random.MinusOneToOne());
 
 			_radialAcceleration = emitterConfig.RadialAcceleration +
-			                      emitterConfig.RadialAccelVariance * Random.MinusOneToOne();
+								  emitterConfig.RadialAccelVariance * Random.MinusOneToOne();
 			_tangentialAcceleration = emitterConfig.TangentialAcceleration +
-			                          emitterConfig.TangentialAccelVariance * Random.MinusOneToOne();
+									  emitterConfig.TangentialAccelVariance * Random.MinusOneToOne();
 
 			// calculate the particle size using the start and finish particle sizes
 			var particleStartSize = emitterConfig.StartParticleSize +
-			                        emitterConfig.StartParticleSizeVariance * Random.MinusOneToOne();
+									emitterConfig.StartParticleSizeVariance * Random.MinusOneToOne();
 			var particleFinishSize = emitterConfig.FinishParticleSize +
-			                         emitterConfig.FinishParticleSizeVariance * Random.MinusOneToOne();
+									 emitterConfig.FinishParticleSizeVariance * Random.MinusOneToOne();
 			_particleSizeDelta = (particleFinishSize - particleStartSize) / _timeToLive;
 			particleSize = MathHelper.Max(0, particleStartSize);
 
@@ -109,10 +110,10 @@ namespace Nez.Particles
 			// of the start color passed in along with the variance are used to calculate the start color
 			_startColor = new Color
 			(
-				(int) (emitterConfig.StartColor.R + emitterConfig.StartColorVariance.R * Random.MinusOneToOne()),
-				(int) (emitterConfig.StartColor.G + emitterConfig.StartColorVariance.G * Random.MinusOneToOne()),
-				(int) (emitterConfig.StartColor.B + emitterConfig.StartColorVariance.B * Random.MinusOneToOne()),
-				(int) (emitterConfig.StartColor.A + emitterConfig.StartColorVariance.A * Random.MinusOneToOne())
+				(int)(emitterConfig.StartColor.R + emitterConfig.StartColorVariance.R * Random.MinusOneToOne()),
+				(int)(emitterConfig.StartColor.G + emitterConfig.StartColorVariance.G * Random.MinusOneToOne()),
+				(int)(emitterConfig.StartColor.B + emitterConfig.StartColorVariance.B * Random.MinusOneToOne()),
+				(int)(emitterConfig.StartColor.A + emitterConfig.StartColorVariance.A * Random.MinusOneToOne())
 			);
 			color = _startColor;
 
@@ -120,17 +121,17 @@ namespace Nez.Particles
 			// way as the start color above
 			_finishColor = new Color
 			(
-				(int) (emitterConfig.FinishColor.R + emitterConfig.FinishColorVariance.R * Random.MinusOneToOne()),
-				(int) (emitterConfig.FinishColor.G + emitterConfig.FinishColorVariance.G * Random.MinusOneToOne()),
-				(int) (emitterConfig.FinishColor.B + emitterConfig.FinishColorVariance.B * Random.MinusOneToOne()),
-				(int) (emitterConfig.FinishColor.A + emitterConfig.FinishColorVariance.A * Random.MinusOneToOne())
+				(int)(emitterConfig.FinishColor.R + emitterConfig.FinishColorVariance.R * Random.MinusOneToOne()),
+				(int)(emitterConfig.FinishColor.G + emitterConfig.FinishColorVariance.G * Random.MinusOneToOne()),
+				(int)(emitterConfig.FinishColor.B + emitterConfig.FinishColorVariance.B * Random.MinusOneToOne()),
+				(int)(emitterConfig.FinishColor.A + emitterConfig.FinishColorVariance.A * Random.MinusOneToOne())
 			);
 
 			// calculate the rotation
 			var startA = MathHelper.ToRadians(emitterConfig.RotationStart +
-			                                  emitterConfig.RotationStartVariance * Random.MinusOneToOne());
+											  emitterConfig.RotationStartVariance * Random.MinusOneToOne());
 			var endA = MathHelper.ToRadians(emitterConfig.RotationEnd +
-			                                emitterConfig.RotationEndVariance * Random.MinusOneToOne());
+											emitterConfig.RotationEndVariance * Random.MinusOneToOne());
 			rotation = startA;
 			_rotationDelta = (endA - startA) / _timeToLive;
 		}
@@ -141,7 +142,7 @@ namespace Nez.Particles
 		/// </summary>
 		/// <param name="emitterConfig">Emitter config.</param>
 		public bool Update(ParticleEmitterConfig emitterConfig, ref ParticleCollisionConfig collisionConfig,
-		                   Vector2 rootPosition)
+						   Vector2 rootPosition)
 		{
 			// PART 1: reduce the life span of the particle
 			_timeToLive -= Time.DeltaTime;
@@ -203,14 +204,14 @@ namespace Nez.Particles
 				// update the rotation of the particle
 				rotation += _rotationDelta * Time.DeltaTime;
 
-
 				if (collisionConfig.Enabled)
 				{
 					// if we already collided we have to handle the collision response
 					if (_collided)
 					{
 						// handle after collision movement. we need to track velocity for this
-						_velocity += collisionConfig.Gravity * Time.DeltaTime;
+						if (!_collidedOnSlope)
+							_velocity += collisionConfig.Gravity * Time.DeltaTime;
 						position += _velocity * Time.DeltaTime;
 
 						// if we move too slow we die
@@ -223,6 +224,7 @@ namespace Nez.Particles
 
 					_circleCollisionShape.RecalculateBounds(particleSize * 0.5f * collisionConfig.RadiusScale,
 						pos + position);
+
 					var neighbors = Physics.BoxcastBroadphase(ref _circleCollisionShape.bounds,
 						collisionConfig.CollidesWithLayers);
 					foreach (var neighbor in neighbors)
@@ -230,10 +232,48 @@ namespace Nez.Particles
 						CollisionResult result;
 						if (_circleCollisionShape.CollidesWithShape(neighbor.Shape, out result))
 						{
+
+							//	if (neighbor is CircleCollider)
+							//	{
+							//		Debug.Log(neighbor.Entity.Name + " CircleCollider");
+							//		Debug.Log("Blood Collider " + Flags.BinaryStringRepresentation(collisionConfig.CollidesWithLayers));
+							//		Debug.Log("Projectile Collider " + Flags.BinaryStringRepresentation(neighbor.PhysicsLayer));
+							//	}
+
+
+
+							#region Slope Collision - BVS Addition
+							/// Added to deal with particles colliding with slopes
+							if (neighbor.Entity.Name == "tiled-map-Entity" && !_collidedOnSlope)
+							{
+
+								Nez.Tiled.TmxLayer CollisionLayer = (Nez.Tiled.TmxLayer)Core.Scene.FindEntity("tiled-map-Entity").GetComponent<TiledMapRenderer>().TiledMap.GetLayer("Block");
+								var tile = CollisionLayer.GetTileAtWorldPosition(result.Point);
+								if (tile != null && tile.TilesetTile != null && tile.TilesetTile.IsSlope)
+								{
+									//float slope = tile.GetSlope();
+									//float offset = slope * (result.Point.X - (tile.X * tile.Tileset.TileWidth));
+									//position.Y += ( slope * (result.Point.X - (tile.X * tile.Tileset.TileWidth)));// System.Math.Abs(slope) * tile.Tileset.TileHeight;
+
+									//Just broad stroke facke the y adjustment for now
+									position.Y += 8;
+									_velocity = Vector2.Zero;
+
+									_collidedOnSlope = true; //Disables physics processing so our particle sticks
+									_collided = true;
+
+									return false;
+								}
+							}
+							#endregion
+
+
 							// handle the overlap
-							position -= result.MinimumTranslationVector;
+							if (!_collidedOnSlope)
+								position -= result.MinimumTranslationVector;
+
 							CalculateCollisionResponseVelocity(collisionConfig.Friction, collisionConfig.Elasticity,
-								ref result.MinimumTranslationVector);
+							ref result.MinimumTranslationVector);
 
 							// handle collision config props
 							_timeToLive -= _timeToLive * collisionConfig.LifetimeLoss;

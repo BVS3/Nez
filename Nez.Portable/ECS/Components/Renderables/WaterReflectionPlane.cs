@@ -54,6 +54,8 @@ namespace Nez
 			_waterReflectionMaterial.Effect.ScreenSpaceVerticalOffset =
 				screenSpaceTop.Y / Entity.Scene.SceneRenderTargetSize.Y;
 
+			//_waterReflectionMaterial.Effect.CurrentTechnique.Passes[0].Apply();
+
 			batcher.Draw(_texture, Bounds, new Rectangle(0, 0, 1, 1), Color);
 		}
 	}

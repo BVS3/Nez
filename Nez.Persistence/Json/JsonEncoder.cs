@@ -46,7 +46,7 @@ namespace Nez.Persistence
 		{
 			WriteValueDelimiter();
 			EncodeString(key);
-			AppendColon();
+            AppendColon();
 			EncodeValue(value);
 		}
 
@@ -106,7 +106,11 @@ namespace Nez.Persistence
 			         value is ulong ||
 			         value is decimal)
 			{
-				_builder.Append(Convert.ToString(value, CultureInfo.InvariantCulture));
+				try
+				{
+					_builder.Append(Convert.ToString(value, CultureInfo.InvariantCulture));
+				}
+				catch { }
 				return;
 			}
 			else
@@ -118,7 +122,6 @@ namespace Nez.Persistence
 		void EncodeString(string value)
 		{
 			_builder.Append('\"');
-
 			var charArray = value.ToCharArray();
 			foreach (var c in charArray)
 			{
@@ -259,7 +262,8 @@ namespace Nez.Persistence
 				{
 					if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IList<>))
 					{
-						listItemType = listType.GetGenericArguments()[0];
+						try { listItemType = listType.GetGenericArguments()[0]; }
+						catch { }
 						break;
 					}
 				}

@@ -8,11 +8,22 @@ namespace Nez.Tiled
 		public TmxMap Map;
 		public string Name { get; set; }
 		public float Opacity { get; set; }
+		//****************************************
+		///Added to support removable layers
+		//****************************************
+		//property to multiply layer color by 
+		public float LayerColorFactor { get; set; } 
+		//****************************************
+
 		public bool Visible { get; set; }
 		public float OffsetX { get; set; }
 		public float OffsetY { get; set; }
 		public Vector2 Offset => new Vector2(OffsetX, OffsetY);
 		public Dictionary<string, string> Properties { get; set; }
+
+		public float ParallaxFactorX { get; set; }
+		public float ParallaxFactorY { get; set; }
+		public Vector2 ParallaxFactor => new Vector2(ParallaxFactorX, ParallaxFactorY);
 
 		/// <summary>
 		/// width in tiles for this layer. Always the same as the map width for fixed-size maps.
@@ -24,6 +35,11 @@ namespace Nez.Tiled
 		/// </summary>
 		public int Height;
 		public TmxLayerTile[] Tiles;
+
+		public TmxLayer()
+		{
+			LayerColorFactor = 1;
+		}
 
 		/// <summary>
 		/// returns the TmxLayerTile with gid. This is a slow lookup so cache it!

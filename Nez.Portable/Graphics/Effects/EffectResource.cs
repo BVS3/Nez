@@ -7,6 +7,9 @@ namespace Nez
 {
 	public static class EffectResource
 	{
+
+		public static byte[] WindEffectBytes => GetFileResourceBytes("Content/Shaders/Wind.mgfxo");
+
 		// sprite effects
 		internal static byte[] SpriteBlinkEffectBytes => GetFileResourceBytes("Content/nez/effects/SpriteBlinkEffect.mgfxo");
 

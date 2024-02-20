@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Nez.BitmapFonts;
+using System;
 
 
 namespace Nez
@@ -136,7 +137,8 @@ namespace Nez
 
 			TotalFrames++;
 
-			Text = string.Format("FPS: {0:0.00}", AverageFramesPerSecond);
+			if (!float.IsInfinity(CurrentFramesPerSecond))
+				Text = string.Format("FPS: {0:0.00}", AverageFramesPerSecond);
 		}
 
 		public override bool IsVisibleFromCamera(Camera camera)
@@ -156,7 +158,7 @@ namespace Nez
 			// due to the override of position in render we have to do the same here
 			var rect = Bounds;
 			rect.Location = LocalOffset;
-			batcher.DrawHollowRect(rect, Color.Yellow);
+			batcher.DrawHollowRect(rect, Color.Orange);
 		}
 
 

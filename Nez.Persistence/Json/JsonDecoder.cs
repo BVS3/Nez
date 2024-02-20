@@ -135,6 +135,8 @@ namespace Nez.Persistence
 					}
 					catch (Exception e)
 					{
+						//System.Console.WriteLine("Failed");
+
 						throw new DecodeException(
 							$"{nameof(FromJsonOverwrite)} only support Dictionary, List and custom objects. Use {nameof(FromJson)} for other types",
 							e);

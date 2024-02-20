@@ -1,4 +1,4 @@
-<Project>	
+﻿<Project>	
 	<PropertyGroup>
 		<BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
 	</PropertyGroup>
@@ -10,7 +10,7 @@
 		<OutputType>Library</OutputType>
 		<RootNamespace>Nez</RootNamespace>
 		<AssemblyName>Nez</AssemblyName>
-		<TargetFramework>net471</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -35,14 +35,13 @@
 			<Link>Content\NezDefaultBMFont.xnb</Link>
 		</EmbeddedResource>
 	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\FNA\FNA.csproj">
-		</ProjectReference>
-	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\..\FNA\FNA.csproj" />
 	</ItemGroup>
 	
 	<Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />

@@ -13,7 +13,12 @@ namespace Nez
 		/// <value>The sparkle intensity.</value>
 		public float SparkleIntensity
 		{
-			set => _sparkleIntensityParam.SetValue(value);
+			set 
+			{
+				_sparkleIntensity = value;
+				_sparkleIntensityParam.SetValue(value); 
+			} 
+			get { return _sparkleIntensity;}
 		}
 
 		/// <summary>
@@ -22,7 +27,12 @@ namespace Nez
 		/// <value>The color of the sparkle.</value>
 		public Vector3 SparkleColor
 		{
-			set => _sparkleColorParam.SetValue(value);
+			set 
+			{
+				_sparkleColor = value;
+				_sparkleColorParam.SetValue(value);
+			}
+			get { return _sparkleColor; }
 		}
 
 		/// <summary>
@@ -32,6 +42,7 @@ namespace Nez
 		public float ScreenSpaceVerticalOffset
 		{
 			set => _screenSpaceVerticalOffsetParam.SetValue(Mathf.Map(value, 0, 1, -1, 1));
+
 		}
 
 		/// <summary>
@@ -40,7 +51,12 @@ namespace Nez
 		/// <value>The perspective correction intensity.</value>
 		public float PerspectiveCorrectionIntensity
 		{
-			set => _perspectiveCorrectionIntensityParam.SetValue(value);
+			set
+			{
+				_perspectiveCorrectionIntensity = value;
+				_perspectiveCorrectionIntensityParam.SetValue(value);
+			}
+			get { return _perspectiveCorrectionIntensity;}
 		}
 
 		/// <summary>
@@ -49,7 +65,12 @@ namespace Nez
 		/// <value>The first displacement speed.</value>
 		public float FirstDisplacementSpeed
 		{
-			set => _firstDisplacementSpeedParam.SetValue(value / 100);
+			set
+			{
+				_firstDisplacementSpeed = value;
+				_firstDisplacementSpeedParam.SetValue(value / 100);
+			}
+			get { return _firstDisplacementSpeed;}
 		}
 
 		/// <summary>
@@ -58,8 +79,15 @@ namespace Nez
 		/// <value>The second displacement speed.</value>
 		public float SecondDisplacementSpeed
 		{
-			set => _secondDisplacementSpeedParam.SetValue(value / 100);
+			set
+			{
+				_secondDisplacementSpeed = value;
+				_secondDisplacementSpeedParam.SetValue(value / 100);
+			}
+			get { return _secondDisplacementSpeed;}
 		}
+
+		 
 
 		/// <summary>
 		/// defaults to 3. the normal map is sampled twice then combined. The 2nd sampling is scaled by this value.
@@ -67,22 +95,28 @@ namespace Nez
 		/// <value>The second displacement scale.</value>
 		public float SecondDisplacementScale
 		{
-			set => _secondDisplacementScaleParam.SetValue(value);
+			set
+			{
+				_secondDisplacementScale = value;	
+				_secondDisplacementScaleParam.SetValue(value);
+			}
+			get { return _secondDisplacementScale;}
 		}
 
-		const float _sparkleIntensity = 0.015f;
-		const float _perspectiveCorrectionIntensity = 0.3f;
-		const float _reflectionIntensity = 0.85f;
-		const float _normalMagnitude = 0.03f;
-		const float _firstDisplacementSpeed = 6f;
-		const float _secondDisplacementSpeed = 2f;
-		const float _secondDisplacementScale = 3f;
+		float _sparkleIntensity = .04f;//0.015f;
+		float _perspectiveCorrectionIntensity = .1f;//0.3f;
+		float _reflectionIntensity = 1.05f; //.085f
+		float _normalMagnitude = 0.03f;
+		float _firstDisplacementSpeed = -16f;//6f;
+		float _secondDisplacementSpeed = 8f;//2f;
+		float _secondDisplacementScale = 4f;//3f;
+		Vector3 _sparkleColor = Vector3.One;
 
 		EffectParameter _timeParam;
 		EffectParameter _sparkleIntensityParam;
 		EffectParameter _sparkleColorParam;
 		EffectParameter _screenSpaceVerticalOffsetParam;
-		EffectParameter _perspectiveCorrectionIntensityParam;
+		EffectParameter _perspectiveCorrectionIntensityParam; 
 		EffectParameter _firstDisplacementSpeedParam;
 		EffectParameter _secondDisplacementSpeedParam;
 		EffectParameter _secondDisplacementScaleParam;
@@ -91,7 +125,8 @@ namespace Nez
 		public WaterReflectionEffect() : base()
 		{
 			CurrentTechnique = Techniques["WaterReflectionTechnique"];
-
+			
+			
 			_timeParam = Parameters["_time"];
 			_sparkleIntensityParam = Parameters["_sparkleIntensity"];
 			_sparkleColorParam = Parameters["_sparkleColor"];
@@ -117,6 +152,7 @@ namespace Nez
 		protected override void OnApply()
 		{
 			_timeParam.SetValue(Time.TotalTime);
+			
 		}
 	}
 }

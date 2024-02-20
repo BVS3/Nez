@@ -18,7 +18,8 @@ namespace Nez
 		/// <summary>
 		/// the Entity this Component is attached to
 		/// </summary>
-		public Entity Entity;
+		//public Entity Entity;
+		public virtual Entity Entity { get; set; }
 
 		/// <summary>
 		/// shortcut to entity.transform

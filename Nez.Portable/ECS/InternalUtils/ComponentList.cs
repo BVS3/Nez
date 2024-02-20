@@ -14,7 +14,7 @@ namespace Nez
 		/// <summary>
 		/// list of components added to the entity
 		/// </summary>
-		FastList<Component> _components = new FastList<Component>();
+		public FastList<Component> _components = new FastList<Component>();
 
 		/// <summary>
 		/// list of all Components that want update called

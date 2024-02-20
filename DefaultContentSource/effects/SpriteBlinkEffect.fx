@@ -13,7 +13,7 @@ struct VertexShaderOutput
 float4 mainPixel( VertexShaderOutput input ) : COLOR
 {
 	float4 color = tex2D( s0, input.TextureCoordinates ) * input.Color;
-	color.rgb = lerp( color.rgb, _blinkColor.rgb, _blinkColor.a );
+	color.rgb = lerp( color.rgb, _blinkColor.rgb, color.a );
 	
 	return color;
 }

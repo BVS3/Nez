@@ -11,7 +11,7 @@
 		public override float Height => _spriteToMime.Height;
 		public override RectangleF Bounds => _spriteToMime.Bounds;
 
-		SpriteRenderer _spriteToMime;
+		protected SpriteRenderer _spriteToMime;
 
 
 		public SpriteMime()

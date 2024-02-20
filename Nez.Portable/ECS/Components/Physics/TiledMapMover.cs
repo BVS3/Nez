@@ -39,6 +39,8 @@ namespace Nez.Tiled
 			public bool WasGroundedLastFrame;
 			public bool IsGroundedOnOneWayPlatform;
 			public float SlopeAngle;
+			public bool OnSlope;
+			public bool IsPassable;
 
 			public bool HasCollision => Below || Right || Left || Above;
 
@@ -68,7 +70,7 @@ namespace Nez.Tiled
 				if (motion.Y == 0)
 					Above = Below = false;
 
-				BecameGroundedThisFrame = IsGroundedOnOneWayPlatform = false;
+				BecameGroundedThisFrame = IsGroundedOnOneWayPlatform = IsPassable = false;
 				SlopeAngle = 0f;
 
 				// deal with subpixel movement, storing off any non-integar remainder for the next frame
@@ -123,6 +125,9 @@ namespace Nez.Tiled
 		Rectangle _boxColliderBounds;
 
 
+		Vector2 _motion;
+
+
 		public TiledMapMover()
 		{ }
 
@@ -140,6 +145,8 @@ namespace Nez.Tiled
 		/// <param name="boxCollider">Box collider.</param>
 		public void Move(Vector2 motion, BoxCollider boxCollider, CollisionState collisionState)
 		{
+			_motion = motion;
+
 			if (TiledMap == null)
 				return;
 
@@ -232,7 +239,100 @@ namespace Nez.Tiled
 						// if we collide here this is an overlap of a slope above us. this small bump down will prevent hitches when hitting
 						// our head on a slope that connects to a solid tile. It puts us below the slope when the normal response would put us
 						// above it
-						motion.Y += 2;
+		//				motion.Y += 2;
+						collisionState.Above = true;
+					}
+
+
+
+				}
+			}
+
+			// set our becameGrounded state based on the previous and current collision state
+			if (!collisionState.WasGroundedLastFrame && collisionState.Below)
+				collisionState.BecameGroundedThisFrame = true;
+		}
+		public void TestCollisionsWithoutResolution(Vector2 motion, Rectangle boxColliderBounds, CollisionState collisionState)
+		{
+			_boxColliderBounds = boxColliderBounds;
+
+			// save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
+			collisionState.WasGroundedLastFrame = collisionState.Below;
+
+			// reset our collisions state
+			collisionState.Reset(ref motion);
+
+			// reset rounded motion for us while dealing with subpixel movement so fetch the rounded values to use for our actual detection
+			var motionX = (int)motion.X;
+			var motionY = (int)motion.Y;
+
+			// first, check movement in the horizontal dir
+			if (motionX != 0)
+			{
+				var direction = motionX > 0 ? Edge.Right : Edge.Left;
+				var sweptBounds = CollisionRectForSide(direction, motionX);
+
+				int collisionResponse;
+				if (TestMapCollision(sweptBounds, direction, collisionState, out collisionResponse))
+				{
+					// react to collision. get the distance between our leading edge and what we collided with
+//					motion.X = collisionResponse - boxColliderBounds.GetSide(direction);
+					collisionState.Left = direction == Edge.Left;
+					collisionState.Right = direction == Edge.Right;
+					collisionState._movementRemainderX.Reset();
+				}
+				else
+				{
+					collisionState.Left = false;
+					collisionState.Right = false;
+				}
+			}
+
+			// next, check movement in the vertical dir
+			{
+				var direction = motionY >= 0 ? Edge.Bottom : Edge.Top;
+				var sweptBounds = CollisionRectForSide(direction, motionY);
+				sweptBounds.X += (int)motion.X;
+
+				int collisionResponse;
+				if (TestMapCollision(sweptBounds, direction, collisionState, out collisionResponse))
+				{
+					// react to collision. get the distance between our leading edge and what we collided with
+					motion.Y = collisionResponse - boxColliderBounds.GetSide(direction);
+					collisionState.Above = direction == Edge.Top;
+					collisionState.Below = direction == Edge.Bottom;
+					collisionState._movementRemainderY.Reset();
+
+					if (collisionState.Below && collisionState._lastGroundTile != null &&
+						collisionState._lastGroundTile.IsSlope())
+						collisionState.SlopeAngle =
+							MathHelper.ToDegrees((float)Math.Atan(collisionState._lastGroundTile.GetSlope()));
+				}
+				else
+				{
+					collisionState.Above = false;
+					collisionState.Below = false;
+					collisionState._lastGroundTile = null;
+				}
+
+
+				// when moving down we also check for collisions in the opposite direction. this needs to be done so that ledge bumps work when
+				// a jump is made but misses by the colliderVerticalInset
+				if (direction == Edge.Bottom)
+				{
+					direction = direction.OppositeEdge();
+					sweptBounds = CollisionRectForSide(direction, 0);
+					sweptBounds.X += (int)motion.X;
+					sweptBounds.Y += (int)motion.Y;
+
+					if (TestMapCollision(sweptBounds, direction, collisionState, out collisionResponse))
+					{
+						// react to collision. get the distance between our leading edge and what we collided with
+//						motion.Y = collisionResponse - boxColliderBounds.GetSide(direction);
+						// if we collide here this is an overlap of a slope above us. this small bump down will prevent hitches when hitting
+						// our head on a slope that connects to a solid tile. It puts us below the slope when the normal response would put us
+						// above it
+//						motion.Y += 2;
 						collisionState.Above = true;
 					}
 				}
@@ -242,7 +342,6 @@ namespace Nez.Tiled
 			if (!collisionState.WasGroundedLastFrame && collisionState.Below)
 				collisionState.BecameGroundedThisFrame = true;
 		}
-
 		bool TestMapCollision(Rectangle collisionRect, Edge direction, CollisionState collisionState,
 							  out int collisionResponse)
 		{
@@ -265,7 +364,7 @@ namespace Nez.Tiled
 					continue;
 
 				if (TestTileCollision(_collidingTiles[i], side, perpindicularPosition, leadingPosition,
-					shouldTestSlopes, out collisionResponse))
+					shouldTestSlopes, out collisionResponse, collisionState))
 				{
 					// store off our last ground tile if we collided below
 					if (direction == Edge.Bottom)
@@ -325,7 +424,7 @@ namespace Nez.Tiled
 		/// <param name="shouldTestSlopes">Should test slopes.</param>
 		/// <param name="collisionResponse">Collision response.</param>
 		bool TestTileCollision(TmxLayerTile tile, Edge edgeToTest, int perpindicularPosition, int leadingPosition,
-							   bool shouldTestSlopes, out int collisionResponse)
+							   bool shouldTestSlopes, out int collisionResponse, CollisionState collisionState)
 		{
 			collisionResponse = leadingPosition;
 
@@ -341,6 +440,24 @@ namespace Nez.Tiled
 				return _boxColliderBounds.Bottom <= collisionResponse;
 			}
 
+			if (tile.IsPassable())
+			{
+				collisionState.IsPassable = true;
+
+				var tiles = _collidingTiles;
+				var passDir = tile.GetPassableDirection();
+				var tileWorld = TiledMap.TileToWorldPosition(tile.Position);
+
+
+				if (edgeToTest == Edge.Top && _motion.Y == 0)
+					return false;
+				else if (edgeToTest == Edge.Right && passDir.Contains("Right"))
+					return false;
+				else if (edgeToTest == Edge.Left && passDir.Contains("Left"))
+					return false;
+				else if (edgeToTest == Edge.Bottom && passDir.Contains("Bottom"))
+					return false;
+			}
 			var forceSlopedTileCheckAsWall = false;
 
 			// when moving horizontally the only time a slope is considered for collision testing is when its closest side is the tallest side
@@ -452,6 +569,7 @@ namespace Nez.Tiled
 					var col = isHorizontal ? primary : secondary;
 					var row = !isHorizontal ? primary : secondary;
 					_collidingTiles.Add(CollisionLayer.GetTile(col, row));
+
 
 #if DEBUG_MOVER
 					if( direction.isHorizontal() )

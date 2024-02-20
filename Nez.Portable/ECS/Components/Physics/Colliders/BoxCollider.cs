@@ -142,6 +142,9 @@ namespace Nez
 				2 * Debug.Size.LineSizeMultiplier);
 		}
 
+
+
+
 		public override string ToString()
 		{
 			return string.Format("[BoxCollider: bounds: {0}", Bounds);

@@ -8,8 +8,10 @@ float4 mainPS( float2 texCoord:TEXCOORD0 ) : COLOR0
 {
 	float4 color = tex2D( s0, texCoord );
 	float2 dist = ( texCoord - 0.5f ) * _radius;
-	dist.x = 1 - dot( dist, dist ) * _power;
-	color.rgb *= dist.x;
+	dist.x = 1 - dot( dist, dist ) * _power ;
+	color.rgb *= dist.x ;
+
+	//color.rgb = lerp(color, color.rgb * dist.x * float3(138,3,3), .2);
 
 	return color;
 }

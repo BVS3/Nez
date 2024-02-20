@@ -260,6 +260,8 @@ namespace Nez
 
 		List<Transform> _children = new List<Transform>();
 
+		public List<Transform> Children { get => _children; }
+
 		#endregion
 
 

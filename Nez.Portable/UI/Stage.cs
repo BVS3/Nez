@@ -670,6 +670,15 @@ namespace Nez.UI
 			_gamepadFocusElement = focusable;
 		}
 
+		/// <summary>
+		/// Removes focus from the current element and turns off gamepad focus for the stage. 
+		/// </summary>
+		public void DisableGamepadFocus()
+		{
+			_isGamepadFocusEnabled = false;
+			_gamepadFocusElement.OnUnfocused();
+			_gamepadFocusElement = null;
+		}
 
 		/// <summary>
 		/// Gets the element that will receive key events.

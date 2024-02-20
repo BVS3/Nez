@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 
 namespace Nez
@@ -161,137 +161,138 @@ namespace Nez
 				{
 					switch (reader.Name)
 					{
+						case "text":
 						case "font":
 						case "markuptext":
-						{
-							IFont font;
-							var s = reader.GetAttribute("face");
-							if (!string.IsNullOrEmpty(s))
-								font = _fontDict[s];
-							else if (formatingStack.Count > 0)
-								font = formatingStack.Peek().Font;
-							else
-								font = _fontDict["default"];
-
-							var color = Color.White;
-							s = reader.GetAttribute("color");
-							if (!string.IsNullOrEmpty(s))
-								color = ParseColor(s);
-							else if (formatingStack.Count > 0)
-								color = formatingStack.Peek().Color;
-
-							var scale = Vector2.One;
-							s = reader.GetAttribute("scale");
-							if (!string.IsNullOrEmpty(s))
-								scale = ParseVector2(s);
-
-							if (reader.Name == "markuptext")
 							{
-								var value = reader.GetAttribute("align");
-								var align = HorizontalAlign.Left;
-								Enum.TryParse(value, out align);
-								alignStack.Push(align);
+								IFont font;
+								var s = reader.GetAttribute("face");
+								if (!string.IsNullOrEmpty(s))
+									font = _fontDict[s];
+								else if (formatingStack.Count > 0)
+									font = formatingStack.Peek().Font;
+								else
+									font = _fontDict["default"];
+
+								var color = Color.White;
+								s = reader.GetAttribute("color");
+								if (!string.IsNullOrEmpty(s))
+									color = ParseColor(s);
+								else if (formatingStack.Count > 0)
+									color = formatingStack.Peek().Color;
+
+								var scale = Vector2.One;
+								s = reader.GetAttribute("scale");
+								if (!string.IsNullOrEmpty(s))
+									scale = ParseVector2(s);
+
+								if (reader.Name == "markuptext")
+								{
+									var value = reader.GetAttribute("align");
+									var align = HorizontalAlign.Left;
+									Enum.TryParse(value, out align);
+									alignStack.Push(align);
+								}
+
+								formatingStack.Push(new FormatInstruction(font, color, scale));
+								break;
 							}
 
-							formatingStack.Push(new FormatInstruction(font, color, scale));
-							break;
-						}
-
 						case "if":
-						{
-							var condition = reader.GetAttribute("condition");
-							var negateCondition = condition[0] == '!';
-							if (negateCondition)
-								condition = condition.Substring(1);
+							{
+								var condition = reader.GetAttribute("condition");
+								var negateCondition = condition[0] == '!';
+								if (negateCondition)
+									condition = condition.Substring(1);
 
-							var value = _conditionalDict[condition];
-							conditionalsStack.Push(negateCondition ? !value : value);
-							break;
-						}
+								var value = _conditionalDict[condition];
+								conditionalsStack.Push(negateCondition ? !value : value);
+								break;
+							}
 
 						case "else":
-						{
-							var value = conditionalsStack.Pop();
-							conditionalsStack.Push(!value);
-							break;
-						}
+							{
+								var value = conditionalsStack.Pop();
+								conditionalsStack.Push(!value);
+								break;
+							}
 
 						case "p":
 						case "br":
-						{
-							if (lineBuffer.Count > 0)
 							{
-								position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
-								currentTotalHeight += currentLineHeight;
-							}
-							else
-							{
-								var currentFormatting = formatingStack.Peek();
-								position.Y += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
-								currentTotalHeight += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
-							}
-
-							currentLineWidth = 0;
-
-							if (reader.Name == "p")
-							{
-								var value = reader.GetAttribute("align");
-								if (string.IsNullOrEmpty(value))
-									value = "Left";
-								value = char.ToUpper(value[0]) + value.Substring(1);
-
-								HorizontalAlign align;
-								if (Enum.TryParse(value, out align))
-									alignStack.Push(align);
+								if (lineBuffer.Count > 0)
+								{
+									position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
+									currentTotalHeight += currentLineHeight;
+								}
 								else
-									throw new InvalidOperationException("Invalid alignemnt: " + value);
-							}
+								{
+									var currentFormatting = formatingStack.Peek();
+									position.Y += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
+									currentTotalHeight += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
+								}
 
-							break;
-						}
+								currentLineWidth = 0;
+
+								if (reader.Name == "p")
+								{
+									var value = reader.GetAttribute("align");
+									if (string.IsNullOrEmpty(value))
+										value = "Left";
+									value = char.ToUpper(value[0]) + value.Substring(1);
+
+									HorizontalAlign align;
+									if (Enum.TryParse(value, out align))
+										alignStack.Push(align);
+									else
+										throw new InvalidOperationException("Invalid alignemnt: " + value);
+								}
+
+								break;
+							}
 
 						case "img":
-						{
-							if (conditionalsStack.Count != 0 && !conditionalsStack.Peek())
-								continue;
-
-							var imgSrc = reader.GetAttribute("src");
-							var color = Color.White;
-							var s = reader.GetAttribute("color");
-							if (!string.IsNullOrEmpty(s))
-								color = ParseColor(s);
-
-							var scale = Vector2.One;
-							s = reader.GetAttribute("scale");
-							if (!string.IsNullOrEmpty(s))
-								scale = ParseVector2(s);
-
-							var image = _textureDict[imgSrc];
-							var imageWidth = image.Width * scale.X;
-							if (position.X + imageWidth > _textWidth)
 							{
-								position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
-								currentTotalHeight += currentLineHeight;
-							}
+								if (conditionalsStack.Count != 0 && !conditionalsStack.Peek())
+									continue;
 
-							lineBuffer.Add(new CompiledImageElement(image, color, position, scale));
-							position.X += imageWidth;
-							currentLineWidth += imageWidth;
-							break;
-						}
+								var imgSrc = reader.GetAttribute("src");
+								var color = Color.White;
+								var s = reader.GetAttribute("color");
+								if (!string.IsNullOrEmpty(s))
+									color = ParseColor(s);
+
+								var scale = Vector2.One;
+								s = reader.GetAttribute("scale");
+								if (!string.IsNullOrEmpty(s))
+									scale = ParseVector2(s);
+
+								var image = _textureDict[imgSrc];
+								var imageWidth = image.Width * scale.X;
+								if (position.X + imageWidth > _textWidth)
+								{
+									position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
+									currentTotalHeight += currentLineHeight;
+								}
+
+								lineBuffer.Add(new CompiledImageElement(image, color, position, scale));
+								position.X += imageWidth;
+								currentLineWidth += imageWidth;
+								break;
+							}
 
 						case "nbsp":
-						{
-							var currentFormatting = formatingStack.Peek();
-							var spaceX = currentFormatting.Font.MeasureString(" ").X * currentFormatting.Scale.X;
-							if (position.X + spaceX < _textWidth)
 							{
-								position.X += spaceX;
-								currentLineWidth += spaceX;
-							}
+								var currentFormatting = formatingStack.Peek();
+								var spaceX = currentFormatting.Font.MeasureString(" ").X * currentFormatting.Scale.X;
+								if (position.X + spaceX < _textWidth)
+								{
+									position.X += spaceX;
+									currentLineWidth += spaceX;
+								}
 
-							break;
-						}
+								break;
+							}
 					}
 				}
 				else if (reader.NodeType == XmlNodeType.Text)
@@ -357,35 +358,36 @@ namespace Nez
 				{
 					switch (reader.Name)
 					{
+						case "text":
 						case "font":
 						case "markuptext":
-						{
-							formatingStack.Pop();
-							break;
-						}
+							{
+								formatingStack.Pop();
+								break;
+							}
 						case "if":
-						{
-							conditionalsStack.Pop();
-							break;
-						}
+							{
+								conditionalsStack.Pop();
+								break;
+							}
 						case "p":
-						{
-							if (lineBuffer.Count > 0)
 							{
-								position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
-								currentTotalHeight += currentLineHeight;
-							}
-							else
-							{
-								var currentFormatting = formatingStack.Peek();
-								position.Y += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
-								currentTotalHeight += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
-							}
+								if (lineBuffer.Count > 0)
+								{
+									position = WrapLine(position, lineBuffer, alignStack.Peek(), out currentLineHeight);
+									currentTotalHeight += currentLineHeight;
+								}
+								else
+								{
+									var currentFormatting = formatingStack.Peek();
+									position.Y += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
+									currentTotalHeight += currentFormatting.Font.LineSpacing * currentFormatting.Scale.Y;
+								}
 
-							currentLineWidth = 0;
-							alignStack.Pop();
-							break;
-						}
+								currentLineWidth = 0;
+								alignStack.Pop();
+								break;
+							}
 					}
 				}
 			}
@@ -409,7 +411,7 @@ namespace Nez
 
 
 		Vector2 WrapLine(Vector2 position, List<ICompiledElement> lineBuffer, HorizontalAlign alignment,
-		                 out float currentLineHeight)
+						 out float currentLineHeight)
 		{
 			currentLineHeight = 0;
 			var lineWidth = 0f;
@@ -456,16 +458,16 @@ namespace Nez
 			var color = Color.White;
 			if (hexString.Length == 8)
 			{
-				color.A = (byte) (hex >> 24);
-				color.R = (byte) (hex >> 16);
-				color.G = (byte) (hex >> 8);
-				color.B = (byte) (hex);
+				color.A = (byte)(hex >> 24);
+				color.R = (byte)(hex >> 16);
+				color.G = (byte)(hex >> 8);
+				color.B = (byte)(hex);
 			}
 			else if (hexString.Length == 6)
 			{
-				color.R = (byte) (hex >> 16);
-				color.G = (byte) (hex >> 8);
-				color.B = (byte) (hex);
+				color.R = (byte)(hex >> 16);
+				color.G = (byte)(hex >> 8);
+				color.B = (byte)(hex);
 			}
 			else
 			{

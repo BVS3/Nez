@@ -12,7 +12,12 @@ namespace Nez
 		/// <value>The reflection intensity.</value>
 		public float ReflectionIntensity
 		{
-			set => _reflectionIntensityParam.SetValue(value);
+			set
+			{
+				_reflectionIntensity = value;
+				_reflectionIntensityParam.SetValue(value);
+			}
+			get { return _reflectionIntensity; }	
 		}
 
 		/// <summary>
@@ -21,7 +26,11 @@ namespace Nez
 		/// <value>The normal magnitude.</value>
 		public float NormalMagnitude
 		{
-			set => _normalMagnitudeParam.SetValue(value);
+			set
+			{	_normalMagnitude = value;
+				_normalMagnitudeParam.SetValue(value);
+			}
+			get { return _normalMagnitude; }
 		}
 
 		/// <summary>
@@ -48,8 +57,8 @@ namespace Nez
 		}
 
 
-		const float _reflectionIntensity = 0.4f;
-		const float _normalMagnitude = 0.05f;
+		float _reflectionIntensity = 0.4f;
+		float _normalMagnitude = 0.05f;
 
 		EffectParameter _reflectionIntensityParam;
 		EffectParameter _renderTextureParam;

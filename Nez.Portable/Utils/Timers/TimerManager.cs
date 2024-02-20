@@ -40,5 +40,11 @@ namespace Nez.Timers
 
 			return timer;
 		}
+
+		public void StopAllTimers()
+		{
+			for (var i = 0; i < _timers.Count - 1; i++)
+				_timers[i].Stop();
+		}
 	}
 }

@@ -50,6 +50,13 @@ namespace Nez.Tiled
 		/// <value>The slope top right.</value>
 		public int SlopeTopRight;
 
+
+		public bool IsPassable;
+		//public string PassableDirection;
+		public List<string> PassableDirections = new List<string>();
+
+		public bool IsStaircase;
+
 		public void ProcessProperties()
 		{
 			string value;
@@ -67,6 +74,17 @@ namespace Nez.Tiled
 
 			if (Properties.TryGetValue("nez:slopeTopRight", out value))
 				SlopeTopRight = int.Parse(value);
+
+			if (Properties.TryGetValue("bvs:isPassable", out value))
+				IsPassable = bool.Parse(value);
+			if (Properties.TryGetValue("bvs:passableDirection", out value))
+			{
+				string[] directions = value.Split(',');
+				PassableDirections = new List<string>(directions);
+			}
+
+			if (Properties.TryGetValue("bvs:isStaircase", out value))
+				IsStaircase = bool.Parse(value);
 		}
 
 		public void UpdateAnimatedTiles()
