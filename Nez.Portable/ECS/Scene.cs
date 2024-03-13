@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Nez.Systems;
 using Nez.Textures;
-using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 
 namespace Nez
@@ -150,13 +150,9 @@ namespace Nez
 		{
 			set
 			{
-				if (_finalRenderDelegate != null)
-					_finalRenderDelegate.Unload();
-
+				_finalRenderDelegate?.Unload();
 				_finalRenderDelegate = value;
-
-				if (_finalRenderDelegate != null)
-					_finalRenderDelegate.OnAddedToScene(this);
+				_finalRenderDelegate?.OnAddedToScene(this);
 			}
 			get => _finalRenderDelegate;
 		}
@@ -209,7 +205,7 @@ namespace Nez
 		Action<Texture2D> _screenshotRequestCallback;
 
 		internal readonly FastList<SceneComponent> _sceneComponents = new FastList<SceneComponent>();
-		internal FastList<Renderer> _renderers = new FastList<Renderer>();
+		internal readonly FastList<Renderer> _renderers = new FastList<Renderer>();
 		internal readonly FastList<Renderer> _afterPostProcessorRenderers = new FastList<Renderer>();
 		internal readonly FastList<PostProcessor> _postProcessors = new FastList<PostProcessor>();
 		bool _didSceneBegin;
@@ -224,8 +220,8 @@ namespace Nez
 		/// <param name="horizontalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
 		/// <param name="verticalBleed">Vertical bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
 		public static void SetDefaultDesignResolution(int width, int height,
-		                                              SceneResolutionPolicy sceneResolutionPolicy,
-		                                              int horizontalBleed = 0, int verticalBleed = 0)
+			SceneResolutionPolicy sceneResolutionPolicy,
+			int horizontalBleed = 0, int verticalBleed = 0)
 		{
 			_defaultDesignResolutionSize = new Point(width, height);
 			_defaultSceneResolutionPolicy = sceneResolutionPolicy;
@@ -323,30 +319,26 @@ namespace Nez
 		/// before begin is ever called.
 		/// </summary>
 		public virtual void Initialize()
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// override this in Scene subclasses. this will be called when Core sets this scene as the active scene.
 		/// </summary>
 		public virtual void OnStart()
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// override this in Scene subclasses and do any unloading necessary here. this is called when Core removes this scene from the active slot.
 		/// </summary>
 		public virtual void Unload()
-		{
-		}
+		{ }
 
-		internal void Begin()
+		public virtual void Begin()
 		{
 			if (_renderers.Length == 0)
 			{
 				AddRenderer(new DefaultRenderer());
-				Debug.Warn(
-					"Scene has begun with no renderer. A DefaultRenderer was added automatically so that something is visible.");
+				Debug.Warn("Scene has begun with no renderer. A DefaultRenderer was added automatically so that something is visible.");
 			}
 
 			Physics.Reset();
@@ -361,7 +353,7 @@ namespace Nez
 			OnStart();
 		}
 
-		internal void End()
+		public virtual void End()
 		{
 			_didSceneBegin = false;
 
@@ -541,7 +533,7 @@ namespace Nez
 		/// <param name="horizontalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
 		/// <param name="verticalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
 		public void SetDesignResolution(int width, int height, SceneResolutionPolicy sceneResolutionPolicy,
-		                                int horizontalBleed = 0, int verticalBleed = 0)
+			int horizontalBleed = 0, int verticalBleed = 0)
 		{
 			_designResolutionSize = new Point(width, height);
 			_resolutionPolicy = sceneResolutionPolicy;
@@ -554,13 +546,13 @@ namespace Nez
 		{
 			var designSize = _designResolutionSize;
 			var screenSize = new Point(Screen.Width, Screen.Height);
-			var screenAspectRatio = (float) screenSize.X / (float) screenSize.Y;
+			var screenAspectRatio = screenSize.X / (float)screenSize.Y;
 
 			var renderTargetWidth = screenSize.X;
 			var renderTargetHeight = screenSize.Y;
 
-			var resolutionScaleX = (float) screenSize.X / (float) designSize.X;
-			var resolutionScaleY = (float) screenSize.Y / (float) designSize.Y;
+			var resolutionScaleX = screenSize.X / (float)designSize.X;
+			var resolutionScaleY = screenSize.Y / (float)designSize.Y;
 
 			var rectCalculated = false;
 
@@ -568,7 +560,7 @@ namespace Nez
 			PixelPerfectScale = 1;
 			if (_resolutionPolicy != SceneResolutionPolicy.None)
 			{
-				if ((float) designSize.X / (float) designSize.Y > screenAspectRatio)
+				if (designSize.X / (float)designSize.Y > screenAspectRatio)
 					PixelPerfectScale = screenSize.X / designSize.X;
 				else
 					PixelPerfectScale = screenSize.Y / designSize.Y;
@@ -604,14 +596,14 @@ namespace Nez
 
 					// we are going to do some cropping so we need to use floats for the scale then round up
 					PixelPerfectScale = 1;
-					if ((float) designSize.X / (float) designSize.Y < screenAspectRatio)
+					if (designSize.X / (float)designSize.Y < screenAspectRatio)
 					{
-						var floatScale = (float) screenSize.X / (float) designSize.X;
+						var floatScale = screenSize.X / (float)designSize.X;
 						PixelPerfectScale = Mathf.CeilToInt(floatScale);
 					}
 					else
 					{
-						var floatScale = (float) screenSize.Y / (float) designSize.Y;
+						var floatScale = screenSize.Y / (float)designSize.Y;
 						PixelPerfectScale = Mathf.CeilToInt(floatScale);
 					}
 
@@ -661,7 +653,7 @@ namespace Nez
 					_finalRenderDestinationRect.Y = (screenSize.Y - _finalRenderDestinationRect.Height) / 2;
 					rectCalculated = true;
 
-					renderTargetWidth = (int) (designSize.X * resolutionScaleX / PixelPerfectScale);
+					renderTargetWidth = (int)(designSize.X * resolutionScaleX / PixelPerfectScale);
 					break;
 				case SceneResolutionPolicy.FixedWidth:
 					resolutionScaleY = resolutionScaleX;
@@ -681,12 +673,12 @@ namespace Nez
 					_finalRenderDestinationRect.Y = (screenSize.Y - _finalRenderDestinationRect.Height) / 2;
 					rectCalculated = true;
 
-					renderTargetHeight = (int) (designSize.Y * resolutionScaleY / PixelPerfectScale);
+					renderTargetHeight = (int)(designSize.Y * resolutionScaleY / PixelPerfectScale);
 
 					break;
 				case SceneResolutionPolicy.BestFit:
-					var safeScaleX = (float) screenSize.X / (designSize.X - _designBleedSize.X);
-					var safeScaleY = (float) screenSize.Y / (designSize.Y - _designBleedSize.Y);
+					var safeScaleX = (float)screenSize.X / (designSize.X - _designBleedSize.X);
+					var safeScaleY = (float)screenSize.Y / (designSize.Y - _designBleedSize.Y);
 
 					var resolutionScale = MathHelper.Max(resolutionScaleX, resolutionScaleY);
 					var safeScale = MathHelper.Min(safeScaleX, safeScaleY);
@@ -712,8 +704,8 @@ namespace Nez
 
 
 			// set some values in the Input class to translate mouse position to our scaled resolution
-			var scaleX = renderTargetWidth / (float) _finalRenderDestinationRect.Width;
-			var scaleY = renderTargetHeight / (float) _finalRenderDestinationRect.Height;
+			var scaleX = renderTargetWidth / (float)_finalRenderDestinationRect.Width;
+			var scaleY = renderTargetHeight / (float)_finalRenderDestinationRect.Height;
 
 			Input._resolutionScale = new Vector2(scaleX, scaleY);
 			Input._resolutionOffset = _finalRenderDestinationRect.Location;
@@ -1001,14 +993,7 @@ namespace Nez
 		/// <param name="entity">The Entity to add</param>
 		public Entity AddEntity(Entity entity)
 		{
-			Insist.IsFalse(Entities.Contains(entity), "You are attempting to add the same entity to a scene twice: {0}", entity);
-			Entities.Add(entity);
-			entity.Scene = this;
-
-			for (var i = 0; i < entity.Transform.ChildCount; i++)
-				AddEntity(entity.Transform.GetChild(i).Entity);
-
-			return entity;
+			return AddEntity<Entity>(entity);
 		}
 
 		/// <summary>
@@ -1020,6 +1005,10 @@ namespace Nez
 			Insist.IsFalse(Entities.Contains(entity), "You are attempting to add the same entity to a scene twice: {0}", entity);
 			Entities.Add(entity);
 			entity.Scene = this;
+
+			for (var i = 0; i < entity.Transform.ChildCount; i++)
+				AddEntity<Entity>(entity.Transform.GetChild(i).Entity);
+
 			return entity;
 		}
 
@@ -1068,6 +1057,5 @@ namespace Nez
 		public List<T> FindComponentsOfType<T>() where T : Component => Entities.FindComponentsOfType<T>();
 
 		#endregion
-
 	}
 }

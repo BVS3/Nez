@@ -2,7 +2,7 @@
 {
 	public class SpriteAnimation
 	{
-		public readonly Sprite[] Sprites;
+		public Sprite[] Sprites;
 		public float[] FrameRates;
 
 		public SpriteAnimation(Sprite[] sprites, float frameRate)

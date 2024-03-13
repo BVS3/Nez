@@ -49,7 +49,7 @@ namespace Nez
 		/// <summary>
 		/// Controls if compomonent updates are called each frame or not
 		/// </summary>
-		public bool UpdatesEnabled;
+		public bool UpdatesEnabled = true;
 
 		/// <summary>
 		/// specifies how often this entitys update method should be called. 1 means every frame, 2 is every other, etc
