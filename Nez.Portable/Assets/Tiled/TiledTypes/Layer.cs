@@ -8,13 +8,13 @@ namespace Nez.Tiled
 		public TmxMap Map;
 		public string Name { get; set; }
 		public float Opacity { get; set; }
+
 		//****************************************
 		///Added to support removable layers
 		//****************************************
 		//property to multiply layer color by 
 		public float LayerColorFactor { get; set; }
 		//****************************************
-
 		public bool Visible { get; set; }
 		public float OffsetX { get; set; }
 		public float OffsetY { get; set; }
@@ -34,7 +34,8 @@ namespace Nez.Tiled
 		/// height in tiles for this layer. Always the same as the map height for fixed-size maps.
 		/// </summary>
 		public int Height;
-		public TmxLayerTile[] Tiles;
+		public uint[] Grid;
+		public Dictionary<uint, TmxLayerTile> Tiles;
 
 		public TmxLayer()
 		{
@@ -46,14 +47,10 @@ namespace Nez.Tiled
 		/// </summary>
 		/// <param name="gid"></param>
 		/// <returns></returns>
-		public TmxLayerTile GetTileWithGid(int gid)
+		public TmxLayerTile GetTileWithGid(uint gid)
 		{
-			for (var i = 0; i < Tiles.Length; i++)
-			{
-				if (Tiles[i] != null && Tiles[i].Gid == gid)
-					return Tiles[i];
-			}
-			return null;
+			Tiles.TryGetValue(gid, out var result);
+			return result;
 		}
 	}
 
@@ -64,10 +61,9 @@ namespace Nez.Tiled
 		const uint FLIPPED_DIAGONALLY_FLAG = 0x20000000;
 
 		public TmxTileset Tileset;
+		// GID which still contains the flip flags.
+		public uint RawGid;
 		public int Gid;
-		public int X;
-		public int Y;
-		public Vector2 Position => new Vector2(X, Y);
 		public bool HorizontalFlip;
 		public bool VerticalFlip;
 		public bool DiagonalFlip;
@@ -101,11 +97,9 @@ namespace Nez.Tiled
 			}
 		}
 
-		public TmxLayerTile(TmxMap map, uint id, int x, int y)
+		public TmxLayerTile(TmxMap map, uint rawGid)
 		{
-			X = x;
-			Y = y;
-			var rawGid = id;
+			RawGid = rawGid;
 
 			// Scan for tile flip bit flags
 			bool flip;
