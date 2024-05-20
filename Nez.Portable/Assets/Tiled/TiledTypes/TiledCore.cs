@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -5,8 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Nez.Tiled
 {
@@ -88,24 +88,46 @@ namespace Nez.Tiled
 			if ((string)xData.Attribute("encoding") != "base64")
 				throw new Exception("TmxBase64Data: Only Base64-encoded data is supported.");
 
-			var rawData = Convert.FromBase64String((string)xData.Value);
+			var rawData = Convert.FromBase64String(xData.Value);
 			Data = new MemoryStream(rawData, false);
 
 			var compression = (string)xData.Attribute("compression");
 			if (compression == "gzip")
 			{
-				Data = new GZipStream(Data, CompressionMode.Decompress);
+				// Create a memory stream with the gzip data
+				using (MemoryStream compressedStream = new MemoryStream(rawData))
+				{
+					// Create a new memory stream to hold the decompressed data
+					MemoryStream decompressedStream = new MemoryStream();
+
+					// Create a GZipStream to decompress the data
+					using (GZipStream gzipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
+					{
+						// Copy the decompressed data to the decompressed stream
+						gzipStream.CopyTo(decompressedStream);
+					}
+
+					// Reset the position of the decompressed stream to the beginning
+					decompressedStream.Position = 0;
+
+					Data = decompressedStream;
+				}
 			}
 			else if (compression == "zlib")
 			{
-				// Strip 2-byte header and 4-byte checksum
-				// TODO: Validate header here
-				var bodyLength = rawData.Length - 6;
-				var bodyData = new byte[bodyLength];
-				Array.Copy(rawData, 2, bodyData, 0, bodyLength);
+				// Strip 2-byte zlib header
+				using (MemoryStream bodyStream = new MemoryStream(rawData, 2, rawData.Length - 2, false))
+				{
 
-				var bodyStream = new MemoryStream(bodyData, false);
-				Data = new DeflateStream(bodyStream, CompressionMode.Decompress);
+					MemoryStream decompressedStream = new MemoryStream();
+					using (DeflateStream deflateStream = new DeflateStream(bodyStream, CompressionMode.Decompress))
+					{
+						deflateStream.CopyTo(decompressedStream);
+					}
+
+					decompressedStream.Position = 0;
+					Data = decompressedStream;
+				}
 
 				// TODO: Validate checksum?
 			}
