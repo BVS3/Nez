@@ -46,6 +46,11 @@ namespace Nez
 		public new static GraphicsDevice GraphicsDevice;
 
 		/// <summary>
+		/// global access to Graphics Manager
+		/// </summary>
+		public new static GraphicsDeviceManager GraphicsManager;
+
+		/// <summary>
 		/// global content manager for loading any assets that should stick around between scenes
 		/// </summary>
 		public new static NezContentManager Content;
@@ -140,7 +145,7 @@ namespace Nez
 			_instance = this;
 			Emitter = new Emitter<CoreEvents>(new CoreEventsComparer());
 
-			var graphicsManager = new GraphicsDeviceManager(this)
+			GraphicsManager = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = width,
 				PreferredBackBufferHeight = height,
@@ -151,10 +156,10 @@ namespace Nez
 				PreferHalfPixelOffset = true
 #endif
 			};
-			graphicsManager.DeviceReset += OnGraphicsDeviceReset;
-			graphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+			GraphicsManager.DeviceReset += OnGraphicsDeviceReset;
+			GraphicsManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 
-			Screen.Initialize(graphicsManager);
+			Screen.Initialize(GraphicsManager);
 			Window.ClientSizeChanged += OnGraphicsDeviceReset;
 			Window.OrientationChanged += OnOrientationChanged;
 

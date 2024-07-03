@@ -1,5 +1,6 @@
-using System;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Runtime.InteropServices;
 
 
 namespace Nez
@@ -24,12 +25,21 @@ namespace Nez
 				if (_graphicsDevice != null)
 				{
 					UpdateResourceReference(false);
+#if FNA
+					_selfReference.Free();
+#else
 					_selfReference = null;
+#endif
 				}
 
 				_graphicsDevice = value;
 
+#if FNA
+				_selfReference = GCHandle.Alloc(this, GCHandleType.Weak);
+#else
+
 				_selfReference = new WeakReference(this);
+#endif
 				UpdateResourceReference(true);
 			}
 		}
@@ -40,7 +50,11 @@ namespace Nez
 		// parameter is true. If disposing is false, the GraphicsDevice may or may not be disposed yet.
 		GraphicsDevice _graphicsDevice;
 
+#if FNA
+		GCHandle _selfReference;
+#else
 		WeakReference _selfReference;
+#endif
 
 
 		internal GraphicsResource()
@@ -83,18 +97,39 @@ namespace Nez
 				if (GraphicsDevice != null)
 					UpdateResourceReference(false);
 
-				_selfReference = null;
+#if FNA
+				_selfReference.Free();
+#else
+					_selfReference = null;
+#endif
 				_graphicsDevice = null;
 				IsDisposed = true;
 			}
 		}
 
-
 		void UpdateResourceReference(bool shouldAdd)
 		{
 			var method = shouldAdd ? "AddResourceReference" : "RemoveResourceReference";
 			var methodInfo = ReflectionUtils.GetMethodInfo(GraphicsDevice, method);
-			methodInfo.Invoke(GraphicsDevice, new object[] {_selfReference});
+			methodInfo.Invoke(GraphicsDevice, new object[] { _selfReference });
+		}
+
+		void UpdateResourceReferenceAlt2(bool shouldAdd)
+		{
+			var method = shouldAdd ? "AddResourceReference" : "RemoveResourceReference";
+			var methodInfo = ReflectionUtils.GetMethodInfo(GraphicsDevice, method);
+
+			if (methodInfo != null)
+			{
+				if (
+					_selfReference.Target is GCHandle handle &&
+					handle.IsAllocated
+				)
+				{
+					var target = handle.Target;
+					methodInfo.Invoke(GraphicsDevice, new object[] { target });
+				}
+			}
 		}
 	}
 }

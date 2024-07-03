@@ -22,12 +22,8 @@ namespace Nez
 
 		public int Value
 		{
-
-
-
 			get
 			{
-				Debug.Log("test");
 				if (!_guardCache) // Guards prevented input.
 				{
 					return 0;
