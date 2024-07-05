@@ -21,6 +21,7 @@ namespace Nez.Textures
 			get { return _frameRate; }
 			set
 			{
+				_frameRate = value;
 				for (int i = 0; i < FrameRates.Length; ++i)
 				{
 					FrameRates[i] = value;
