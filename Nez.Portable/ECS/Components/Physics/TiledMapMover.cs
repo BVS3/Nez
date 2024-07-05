@@ -1,7 +1,7 @@
 ﻿//#define DEBUG_MOVER
 
-using System;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 
 
@@ -39,7 +39,7 @@ namespace Nez.Tiled
 			public bool WasGroundedLastFrame;
 			public bool IsGroundedOnOneWayPlatform;
 			public float SlopeAngle;
-			public bool OnSlope;
+			public bool OnSlope => SlopeAngle != 0 ? true : false;
 			public bool IsPassable;
 
 			public bool HasCollision => Below || Right || Left || Above;
@@ -239,7 +239,7 @@ namespace Nez.Tiled
 						// if we collide here this is an overlap of a slope above us. this small bump down will prevent hitches when hitting
 						// our head on a slope that connects to a solid tile. It puts us below the slope when the normal response would put us
 						// above it
-		//				motion.Y += 2;
+						//				motion.Y += 2;
 						collisionState.Above = true;
 					}
 
@@ -276,7 +276,7 @@ namespace Nez.Tiled
 				if (TestMapCollision(sweptBounds, direction, collisionState, out collisionResponse))
 				{
 					// react to collision. get the distance between our leading edge and what we collided with
-//					motion.X = collisionResponse - boxColliderBounds.GetSide(direction);
+					//					motion.X = collisionResponse - boxColliderBounds.GetSide(direction);
 					collisionState.Left = direction == Edge.Left;
 					collisionState.Right = direction == Edge.Right;
 					collisionState._movementRemainderX.Reset();
@@ -328,11 +328,11 @@ namespace Nez.Tiled
 					if (TestMapCollision(sweptBounds, direction, collisionState, out collisionResponse))
 					{
 						// react to collision. get the distance between our leading edge and what we collided with
-//						motion.Y = collisionResponse - boxColliderBounds.GetSide(direction);
+						//						motion.Y = collisionResponse - boxColliderBounds.GetSide(direction);
 						// if we collide here this is an overlap of a slope above us. this small bump down will prevent hitches when hitting
 						// our head on a slope that connects to a solid tile. It puts us below the slope when the normal response would put us
 						// above it
-//						motion.Y += 2;
+						//						motion.Y += 2;
 						collisionState.Above = true;
 					}
 				}
