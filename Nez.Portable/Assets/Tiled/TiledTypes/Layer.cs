@@ -108,10 +108,7 @@ namespace Nez.Tiled
 			flip = (rawGid & FLIPPED_DIAGONALLY_FLAG) != 0;
 			DiagonalFlip = flip;
 
-
-
 			Gid = ClearFlipFlags(rawGid);
-
 			Tileset = map.GetTilesetForTileGid(Gid);
 		}
 

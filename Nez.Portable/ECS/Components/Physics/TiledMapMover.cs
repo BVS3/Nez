@@ -1,4 +1,4 @@
-﻿//#define DEBUG_MOVER
+// #define DEBUG_MOVER
 
 using Microsoft.Xna.Framework;
 using System;
@@ -557,10 +557,10 @@ namespace Nez.Tiled
 					_collidingTilesCoordinates.Add(new Point(col, row));
 
 #if DEBUG_MOVER
-					if( direction.isHorizontal() )
+					if(direction.IsHorizontal())
 					{
-						var pos = tiledMap.tileToWorldPosition( new Point( col, row ) );
-						_debugTiles.Add( new Rectangle( (int)pos.X, (int)pos.Y, 16, 16 ) );
+						var pos = TiledMap.TileToWorldPosition(new Point(col, row));
+						_debugTiles.Add(new Rectangle((int)pos.X, (int)pos.Y, 16, 16));
 					}
 #endif
 				}
@@ -612,32 +612,32 @@ namespace Nez.Tiled
 
 
 #if DEBUG_MOVER
-		public override float width { get { return 10000; } }
-		public override float height { get { return 10000; } }
+		public override float Width { get { return 10000; } }
+		public override float Height { get { return 10000; } }
 		List<Rectangle> _debugTiles = new List<Rectangle>();
 
-		public override void render( Graphics graphics, Camera camera )
+		public override void Render(Batcher batcher, Camera camera)
 		{
-			for( var i = 0; i < _debugTiles.Count; i++ )
+			for (var i = 0; i < _debugTiles.Count; i++)
 			{
 				var t = _debugTiles[i];
-				graphics.batcher.drawHollowRect( t, Color.Yellow );
+				batcher.DrawHollowRect(t, Color.Yellow);
 
-				Debug.drawText( Graphics.instance.bitmapFont, i.ToString(), t.Center.ToVector2(), Color.White );
+				Debug.DrawText(Graphics.Instance.BitmapFont, i.ToString(), t.Center.ToVector2(), Color.White);
 			}
 			_debugTiles.Clear();
 
-			var bounds = collisionRectForSide( Edge.Top, 0 );
-			graphics.batcher.drawHollowRect( bounds, Color.Orchid );
+			var bounds = CollisionRectForSide(Edge.Top, 0);
+			batcher.DrawHollowRect(bounds, Color.Orchid);
 
-			bounds = collisionRectForSide( Edge.Bottom, 0 );
-			graphics.batcher.drawHollowRect( bounds, Color.Orange );
+			bounds = CollisionRectForSide(Edge.Bottom, 0);
+			batcher.DrawHollowRect(bounds, Color.Orange);
 
-			bounds = collisionRectForSide( Edge.Right, 0 );
-			graphics.batcher.drawHollowRect( bounds, Color.Blue );
+			bounds = CollisionRectForSide(Edge.Right, 0);
+			batcher.DrawHollowRect(bounds, Color.Blue);
 
-			bounds = collisionRectForSide( Edge.Left, 0 );
-			graphics.batcher.drawHollowRect( bounds, Color.Green );
+			bounds = CollisionRectForSide(Edge.Left, 0);
+			batcher.DrawHollowRect(bounds, Color.Green);
 		}
 
 #endif
