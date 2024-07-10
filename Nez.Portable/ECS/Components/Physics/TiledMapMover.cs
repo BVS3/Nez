@@ -463,7 +463,7 @@ namespace Nez.Tiled
 				// using the edge before movement, we see if we were colliding before moving.
 				var wasCollidingBeforeMove = moveDir == Edge.Right
 					? leadingPositionPreMovement > tileX
-					: leadingPositionPreMovement < tileX;
+					: leadingPositionPreMovement < tileX + 1;
 
 				// if we were not colliding before moving we need to consider this tile for a collision check as if it were a wall tile
 				forceSlopedTileCheckAsWall = !wasCollidingBeforeMove;
