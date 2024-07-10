@@ -70,7 +70,7 @@ namespace Nez.Tiled
 				if (motion.Y == 0)
 					Above = Below = false;
 
-				BecameGroundedThisFrame = IsGroundedOnOneWayPlatform = false;
+				BecameGroundedThisFrame = IsGroundedOnOneWayPlatform = IsPassable = false;
 				SlopeAngle = 0f;
 
 				// deal with subpixel movement, storing off any non-integar remainder for the next frame
