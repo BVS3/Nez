@@ -33,7 +33,7 @@ namespace Nez.Tiled
 			var tName = t.Name;
 
 			// Rename duplicate entries by appending a number
-			if (_nameCount.ContainsKey(tName))
+			if (Contains(tName))
 				_nameCount[tName] += 1;
 			else
 				_nameCount.Add(tName, 0);
@@ -94,22 +94,17 @@ namespace Nez.Tiled
 			var compression = (string)xData.Attribute("compression");
 			if (compression == "gzip")
 			{
-				// Create a memory stream with the gzip data
 				using (MemoryStream compressedStream = new MemoryStream(rawData))
 				{
-					// Create a new memory stream to hold the decompressed data
 					MemoryStream decompressedStream = new MemoryStream();
 
-					// Create a GZipStream to decompress the data
 					using (GZipStream gzipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
 					{
-						// Copy the decompressed data to the decompressed stream
 						gzipStream.CopyTo(decompressedStream);
 					}
 
 					// Reset the position of the decompressed stream to the beginning
 					decompressedStream.Position = 0;
-
 					Data = decompressedStream;
 				}
 			}
@@ -125,11 +120,10 @@ namespace Nez.Tiled
 						deflateStream.CopyTo(decompressedStream);
 					}
 
+					// Reset the position of the decompressed stream to the beginning
 					decompressedStream.Position = 0;
 					Data = decompressedStream;
 				}
-
-				// TODO: Validate checksum?
 			}
 			else if (compression != null)
 			{
