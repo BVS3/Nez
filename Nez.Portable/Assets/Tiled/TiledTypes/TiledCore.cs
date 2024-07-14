@@ -33,7 +33,7 @@ namespace Nez.Tiled
 			var tName = t.Name;
 
 			// Rename duplicate entries by appending a number
-			if (Contains(tName))
+			if (_nameCount.ContainsKey(tName))
 				_nameCount[tName] += 1;
 			else
 				_nameCount.Add(tName, 0);
