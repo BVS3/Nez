@@ -27,6 +27,11 @@ namespace Nez.Timers
 			_elapsedTime = 0f;
 		}
 
+		public float RemainingTime()
+		{
+			return _elapsedTime;
+		}
+
 		public T GetContext<T>()
 		{
 			return (T)Context;
