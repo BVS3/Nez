@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Nez.Particles;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Nez.Particles;
 
 namespace Nez.ParticleDesigner
 {
@@ -90,22 +92,25 @@ namespace Nez.ParticleDesigner
 						using (var mem = new MemoryStream())
 						{
 							stream.CopyTo(mem);
+							mem.Seek(0, SeekOrigin.Begin);
 
-							var bitmap = System.Drawing.Image.FromStream(mem) as System.Drawing.Bitmap;
-							var colors = new Color[bitmap.Width * bitmap.Height];
-
-							for (var x = 0; x < bitmap.Width; x++)
+							using (var image = Image.Load<Rgba32>(mem))
 							{
-								for (var y = 0; y < bitmap.Height; y++)
-								{
-									var drawColor = bitmap.GetPixel(x, y);
-									colors[x + y * bitmap.Width] = new Color(drawColor.R, drawColor.G, drawColor.B, drawColor.A);
-								}
-							}
+								var colors = new Microsoft.Xna.Framework.Color[image.Width * image.Height];
 
-							var texture = new Texture2D(Core.GraphicsDevice, bitmap.Width, bitmap.Height);
-							texture.SetData(colors);
-							config.Sprite = new Textures.Sprite(texture);
+								for (var y = 0; y < image.Height; y++)
+								{
+									for (var x = 0; x < image.Width; x++)
+									{
+										var pixel = image[x, y];
+										colors[x + y * image.Width] = new Microsoft.Xna.Framework.Color(pixel.R, pixel.G, pixel.B, pixel.A);
+									}
+								}
+
+								var texture = new Texture2D(Core.GraphicsDevice, image.Width, image.Height);
+								texture.SetData(colors);
+								config.Sprite = new Textures.Sprite(texture);
+							}
 						}
 					}
 				}
@@ -136,10 +141,10 @@ namespace Nez.ParticleDesigner
 			return new Vector2((float)ele.Attribute("x"), (float)ele.Attribute("y"));
 		}
 
-		static Color GetColorElement(XElement root, string name)
+		static Microsoft.Xna.Framework.Color GetColorElement(XElement root, string name)
 		{
 			var ele = root.Element(name);
-			return new Color((float)ele.Attribute("red"), (float)ele.Attribute("green"), (float)ele.Attribute("blue"), (float)ele.Attribute("alpha"));
+			return new Microsoft.Xna.Framework.Color((float)ele.Attribute("red"), (float)ele.Attribute("green"), (float)ele.Attribute("blue"), (float)ele.Attribute("alpha"));
 		}
 
 		static Blend GetBlendElement(XElement root, string name)
