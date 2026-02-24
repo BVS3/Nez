@@ -1,8 +1,8 @@
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using Microsoft.Xna.Framework;
 
 namespace Nez.Aseprite
 {
@@ -91,6 +91,30 @@ namespace Nez.Aseprite
 				{
 					return ReadAsepriteFile(reader, name, premultiplyAlpha);
 				}
+			}
+		}
+
+		/// <summary>
+		/// Loads an Aseprite (.ase/.aseprite) file and creates an instance with the contents of the file.
+		/// </summary>
+		/// <param name="stream">The stream to use</param>
+		/// <param name="name">The name of the Aseprite (.ase/.aseprite) file to load</param>
+		/// <param name="premultiplyAlpha">
+		/// Indicates whether color data generated while reading the content of this Aseprite file should be
+		/// premultipled.  Default is false.
+		/// </param>
+		/// <returns>
+		/// A new instance of the <see cref="AsepriteFile"/> class initialized with the contents read from the Aseprite
+		/// file.
+		/// </returns>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown if an error occurs while attempting to read the Aseprite file. See exception message for details.
+		/// </exception>
+		public static AsepriteFile Load(Stream stream, string name, bool premultiplyAlpha = false)
+		{
+			using (BinaryReader reader = new BinaryReader(stream))
+			{
+				return ReadAsepriteFile(reader, name, premultiplyAlpha);
 			}
 		}
 

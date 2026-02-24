@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nez.Textures;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Nez.Sprites
 {
@@ -17,6 +17,31 @@ namespace Nez.Sprites
 			var spriteAtlas = ParseSpriteAtlasData(dataFile);
 			using (var stream = TitleContainer.OpenStream(dataFile.Replace(".atlas", ".png")))
 				return spriteAtlas.AsSpriteAtlas(premultiplyAlpha ? TextureUtils.TextureFromStreamPreMultiplied(stream) : Texture2D.FromStream(Core.GraphicsDevice, stream));
+		}
+
+		/// <summary>
+		/// parses a .atlas file and loads up a SpriteAtlas with it's associated Texture
+		/// </summary>
+		public static SpriteAtlas ParseSpriteAtlas(
+			Stream atlasDataStream,
+			Stream textureStream,
+			bool premultiplyAlpha = false)
+		{
+			var spriteAtlas = ParseSpriteAtlasData(atlasDataStream);
+
+			var tex = premultiplyAlpha
+				? TextureUtils.TextureFromStreamPreMultiplied(textureStream)
+				: Texture2D.FromStream(Core.GraphicsDevice, textureStream);
+
+			return spriteAtlas.AsSpriteAtlas(tex);
+		}
+
+		private static SpriteAtlasData ParseSpriteAtlasData(Stream stream)
+		{
+			using var reader = new StreamReader(stream);
+			var text = reader.ReadToEnd();
+
+			return ParseSpriteAtlasData(text);
 		}
 
 		/// <summary>

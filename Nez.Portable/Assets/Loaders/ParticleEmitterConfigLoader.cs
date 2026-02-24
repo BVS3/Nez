@@ -28,6 +28,14 @@ namespace Nez.ParticleDesigner
 			}
 		}
 
+		public static ParticleEmitterConfig Load(Stream stream, string assetPath)
+		{
+			using (var reader = XmlReader.Create(stream))
+			{
+				return Load(XDocument.Load(reader), Path.GetDirectoryName(assetPath));
+			}
+		}
+
 		static ParticleEmitterConfig Load(XDocument xDoc, string rootDir)
 		{
 			var root = xDoc.Element("particleEmitterConfig");

@@ -1,6 +1,6 @@
+using Microsoft.Xna.Framework;
 using System;
 using System.IO;
-using Microsoft.Xna.Framework;
 
 
 namespace Nez
@@ -100,7 +100,7 @@ namespace Nez
 		{
 			var assembly = typeof(MathHelper).Assembly;
 #if FNA
-			name = name.Replace( ".ogl.mgfxo", ".fxb" );
+			name = name.Replace(".ogl.mgfxo", ".fxb");
 #else
 			// MG 3.8 decided to change the location of Effecs...sigh.
 			if (!assembly.GetManifestResourceNames().Contains(name))
@@ -127,13 +127,13 @@ namespace Nez
 		public static byte[] GetFileResourceBytes(string path)
 		{
 #if FNA
-			path = path.Replace( ".mgfxo", ".fxb" );
+			path = path.Replace(".mgfxo", ".fxb");
 #endif
 
 			byte[] bytes;
 			try
 			{
-				using (var stream = TitleContainer.OpenStream(path))
+				using (var stream = Core.Content.OpenStreamPublic(path))
 				{
 					if (stream.CanSeek)
 					{

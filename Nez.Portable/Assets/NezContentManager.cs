@@ -1,19 +1,19 @@
-﻿using System;
-using System.Threading;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
-using System.Threading.Tasks;
-using System.IO;
-using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Nez.Aseprite;
+using Nez.BitmapFonts;
 using Nez.ParticleDesigner;
 using Nez.Sprites;
 using Nez.Textures;
 using Nez.Tiled;
-using Microsoft.Xna.Framework.Audio;
-using Nez.BitmapFonts;
-using Nez.Aseprite;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace Nez.Systems
@@ -27,7 +27,7 @@ namespace Nez.Systems
 
 		List<IDisposable> _disposableAssets;
 
-		List<IDisposable> DisposableAssets
+		public List<IDisposable> DisposableAssets
 		{
 			get
 			{
@@ -43,7 +43,7 @@ namespace Nez.Systems
 
 #if FNA
 		Dictionary<string, object> _loadedAssets;
-		Dictionary<string, object> LoadedAssets
+		public Dictionary<string, object> LoadedAssets
 		{
 			get
 			{
@@ -59,13 +59,17 @@ namespace Nez.Systems
 
 
 		public NezContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
-		{}
+		{ }
 
 		public NezContentManager(IServiceProvider serviceProvider) : base(serviceProvider)
-		{}
+		{ }
 
 		public NezContentManager() : base(((Game)Core._instance).Services, ((Game)Core._instance).Content.RootDirectory)
-		{}
+		{ }
+
+		//Allow public access to OpenStream, used in EffectResource.cs to allow shaders to be loaded via custom content manager
+		public Stream OpenStreamPublic(string name) => OpenStream(name);
+
 
 		#region Strongly Typed Loaders
 
@@ -74,7 +78,7 @@ namespace Nez.Systems
 		/// extension or be preceded by "Content" in the path. png/jpg files should have the file extension and have an absolute
 		/// path or a path starting with "Content".
 		/// </summary>
-		public Texture2D LoadTexture(string name, bool premultiplyAlpha = false)
+		public virtual Texture2D LoadTexture(string name, bool premultiplyAlpha = false)
 		{
 			// no file extension. Assumed to be an xnb so let ContentManager load it
 			if (string.IsNullOrEmpty(Path.GetExtension(name)))
@@ -102,7 +106,7 @@ namespace Nez.Systems
 		/// extension or be preceded by "Content" in the path. wav files should have the file extension and have an absolute
 		/// path or a path starting with "Content".
 		/// </summary>
-		public SoundEffect LoadSoundEffect(string name)
+		public virtual SoundEffect LoadSoundEffect(string name)
 		{
 			// no file extension. Assumed to be an xnb so let ContentManager load it
 			if (string.IsNullOrEmpty(Path.GetExtension(name)))
@@ -128,7 +132,7 @@ namespace Nez.Systems
 		/// <summary>
 		/// loads a Tiled map
 		/// </summary>
-		public TmxMap LoadTiledMap(string name)
+		public virtual TmxMap LoadTiledMap(string name)
 		{
 			if (LoadedAssets.TryGetValue(name, out var asset))
 			{
@@ -147,7 +151,7 @@ namespace Nez.Systems
 		/// <summary>
 		/// Loads a ParticleDesigner pex file
 		/// </summary>
-		public Particles.ParticleEmitterConfig LoadParticleEmitterConfig(string name)
+		public virtual Particles.ParticleEmitterConfig LoadParticleEmitterConfig(string name)
 		{
 			if (LoadedAssets.TryGetValue(name, out var asset))
 			{
@@ -166,7 +170,7 @@ namespace Nez.Systems
 		/// <summary>
 		/// Loads a SpriteAtlas created with the Sprite Atlas Packer tool
 		/// </summary>
-		public SpriteAtlas LoadSpriteAtlas(string name, bool premultiplyAlpha = false)
+		public virtual SpriteAtlas LoadSpriteAtlas(string name, bool premultiplyAlpha = false)
 		{
 			if (LoadedAssets.TryGetValue(name, out var asset))
 			{
@@ -185,7 +189,7 @@ namespace Nez.Systems
 		/// <summary>
 		/// Loads a BitmapFont
 		/// </summary>
-		public BitmapFont LoadBitmapFont(string name, bool premultiplyAlpha = false)
+		public virtual BitmapFont LoadBitmapFont(string name, bool premultiplyAlpha = false)
 		{
 			if (LoadedAssets.TryGetValue(name, out var asset))
 			{
@@ -209,7 +213,7 @@ namespace Nez.Systems
 		/// A new instance of the <see cref="AsepriteFile"/> class initialized with the data read from the Aseprite
 		/// file.
 		/// </returns>
-		public AsepriteFile LoadAsepriteFile(string name)
+		public virtual AsepriteFile LoadAsepriteFile(string name)
 		{
 			if (LoadedAssets.TryGetValue(name, out var asset))
 			{
@@ -228,7 +232,7 @@ namespace Nez.Systems
 		/// </summary>
 		/// <returns>The effect.</returns>
 		/// <param name="name">Name.</param>
-		public Effect LoadEffect(string name) => LoadEffect<Effect>(name);
+		public virtual Effect LoadEffect(string name) => LoadEffect<Effect>(name);
 
 		/// <summary>
 		/// loads an embedded Nez effect. These are any of the Effect subclasses in the Nez/Graphics/Effects folder.
@@ -236,7 +240,7 @@ namespace Nez.Systems
 		/// </summary>
 		/// <returns>The nez effect.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public T LoadNezEffect<T>() where T : Effect, new()
+		public virtual T LoadNezEffect<T>() where T : Effect, new()
 		{
 			var cacheKey = typeof(T).Name + "-" + Utils.RandomString(5);
 			var effect = new T();
@@ -253,7 +257,7 @@ namespace Nez.Systems
 		/// </summary>
 		/// <returns>The effect.</returns>
 		/// <param name="name">Name.</param>
-		public T LoadEffect<T>(string name) where T : Effect
+		public virtual T LoadEffect<T>(string name) where T : Effect
 		{
 			// make sure the effect has the proper root directory
 			if (!name.StartsWith(RootDirectory))
@@ -271,7 +275,7 @@ namespace Nez.Systems
 		/// </summary>
 		/// <returns>The effect.</returns>
 		/// <param name="name">Name.</param>
-		public T LoadEffect<T>(string name, byte[] effectCode) where T : Effect
+		public virtual T LoadEffect<T>(string name, byte[] effectCode) where T : Effect
 		{
 			var effect = Activator.CreateInstance(typeof(T), Core.GraphicsDevice, effectCode) as T;
 			effect.Name = name + "-" + Utils.RandomString(5);
@@ -287,7 +291,7 @@ namespace Nez.Systems
 		/// </summary>
 		/// <returns>The mono game effect.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public T LoadMonoGameEffect<T>() where T : Effect
+		public virtual T LoadMonoGameEffect<T>() where T : Effect
 		{
 			var effect = Activator.CreateInstance(typeof(T), Core.GraphicsDevice) as T;
 			effect.Name = typeof(T).Name + "-" + Utils.RandomString(5);
@@ -482,13 +486,14 @@ namespace Nez.Systems
 	sealed class NezGlobalContentManager : NezContentManager
 	{
 		public NezGlobalContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
-		{}
+		{ }
 
 		/// <summary>
 		/// override that will load embedded resources if they have the "nez://" prefix
 		/// </summary>
 		/// <returns>The stream.</returns>
 		/// <param name="assetName">Asset name.</param>
+
 		protected override Stream OpenStream(string assetName)
 		{
 			if (assetName.StartsWith("nez://"))

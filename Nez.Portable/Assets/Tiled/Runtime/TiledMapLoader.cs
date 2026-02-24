@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Nez.Systems;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Nez.Systems;
 
 namespace Nez.Tiled
 {
@@ -167,7 +167,9 @@ namespace Nez.Tiled
 				}
 			}
 
-			return new TmxTileset().LoadTmxTileset(map, xTileset, firstGid, tmxDir);
+			//return new TmxTileset().LoadTmxTileset(map, xTileset, firstGid, tmxDir);
+			// Pass the contentManager through
+			return new TmxTileset().LoadTmxTileset(map, xTileset, firstGid, tmxDir, contentManager);
 		}
 
 		public static Dictionary<string, string> ParsePropertyDict(XContainer xmlProp)
