@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Nez.Textures;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Nez.Textures;
 
 
 namespace Nez.BitmapFonts
@@ -159,7 +159,7 @@ namespace Nez.BitmapFonts
 							case "char":
 								var charData = new Character
 								{
-									Char = (char) BitmapFontLoader.GetNamedInt(parts, "id"),
+									Char = (char)BitmapFontLoader.GetNamedInt(parts, "id"),
 									Bounds = new Rectangle(BitmapFontLoader.GetNamedInt(parts, "x"),
 										BitmapFontLoader.GetNamedInt(parts, "y"),
 										BitmapFontLoader.GetNamedInt(parts, "width"),
@@ -173,8 +173,8 @@ namespace Nez.BitmapFonts
 								charDictionary.Add(charData.Char, charData);
 								break;
 							case "kerning":
-								var key = new Kerning((char) BitmapFontLoader.GetNamedInt(parts, "first"),
-									(char) BitmapFontLoader.GetNamedInt(parts, "second"),
+								var key = new Kerning((char)BitmapFontLoader.GetNamedInt(parts, "first"),
+									(char)BitmapFontLoader.GetNamedInt(parts, "second"),
 									BitmapFontLoader.GetNamedInt(parts, "amount"));
 
 								if (!kerningDictionary.ContainsKey(key))
@@ -283,7 +283,7 @@ namespace Nez.BitmapFonts
 			foreach (XmlNode node in root.SelectNodes("chars/char"))
 			{
 				var character = new Character();
-				character.Char = (char) Convert.ToInt32(node.Attributes["id"].Value);
+				character.Char = (char)Convert.ToInt32(node.Attributes["id"].Value);
 				character.Bounds = new Rectangle(Convert.ToInt32(node.Attributes["x"].Value),
 					Convert.ToInt32(node.Attributes["y"].Value),
 					Convert.ToInt32(node.Attributes["width"].Value),
@@ -302,8 +302,8 @@ namespace Nez.BitmapFonts
 			// loading kerning information
 			foreach (XmlNode node in root.SelectNodes("kernings/kerning"))
 			{
-				var key = new Kerning((char) Convert.ToInt32(node.Attributes["first"].Value),
-					(char) Convert.ToInt32(node.Attributes["second"].Value),
+				var key = new Kerning((char)Convert.ToInt32(node.Attributes["first"].Value),
+					(char)Convert.ToInt32(node.Attributes["second"].Value),
 					Convert.ToInt32(node.Attributes["amount"].Value));
 
 				if (!kerningDictionary.ContainsKey(key))
@@ -318,7 +318,7 @@ namespace Nez.BitmapFonts
 			Textures = new Texture2D[Pages.Length];
 			for (var i = 0; i < Textures.Length; i++)
 			{
-				using (var stream = TitleContainer.OpenStream(Pages[i].Filename))
+				using (var stream = Core.Content.OpenStreamPublic(Pages[i].Filename))
 					Textures[i] = premultiplyAlpha ? TextureUtils.TextureFromStreamPreMultiplied(stream) : Texture2D.FromStream(Core.GraphicsDevice, stream);
 			}
 		}
